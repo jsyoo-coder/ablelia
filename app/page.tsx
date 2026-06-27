@@ -110,13 +110,18 @@ export default function Home() {
     return () => observer.disconnect();
   }, [loadingMore, fetching, items.length, fetchItems]);
 
-  // 초기 피드 + 관심사 변경 시 재요청
-  const prefsKey = profile?.preferences?.join(",") ?? "";
+  // 초기 피드 + 관심사/브랜드 변경 시 재요청
+  const prefsKey = [
+    ...(profile?.preferences ?? []),
+    ...(profile?.brands ?? []),
+  ].join(",");
   useEffect(() => {
     if (tab !== "feed" || loading) return;
-    const prefs = profile?.onboardingComplete ? (profile.preferences ?? []) : [];
-    const pool = prefs.length > 0 ? prefs.map(p => STYLE_QUERIES[p] ?? p) : TRENDING;
-    const q = pool[Math.floor(Math.random() * pool.length)];
+    if (!profile?.onboardingComplete) { fetchItems(TRENDING[Math.floor(Math.random() * TRENDING.length)], 1, false); return; }
+    const stylePool = (profile.preferences ?? []).map(p => STYLE_QUERIES[p] ?? p);
+    const brandPool = (profile.brands ?? []).map(b => b); // 브랜드명 그대로 검색
+    const pool = [...stylePool, ...brandPool];
+    const q = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : TRENDING[Math.floor(Math.random() * TRENDING.length)];
     setActiveStyle(null);
     fetchItems(q, 1, false);
   // eslint-disable-next-line react-hooks/exhaustive-deps

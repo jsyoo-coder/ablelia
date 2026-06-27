@@ -10,6 +10,7 @@ type UserProfile = {
   photoURL: string;
   email: string;
   preferences: string[];
+  brands: string[];
   onboardingComplete: boolean;
 };
 
@@ -19,7 +20,7 @@ type AuthContextType = {
   loading: boolean;
   signInWithGoogle: () => Promise<string | null>;
   logout: () => Promise<void>;
-  updatePreferences: (preferences: string[]) => Promise<void>;
+  updatePreferences: (preferences: string[], brands?: string[]) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -66,6 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             displayName: freshName,
             email: u.email ?? "",
             preferences: [],
+            brands: [],
             onboardingComplete: false,
           };
 
@@ -133,13 +135,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await signOut(auth);
   }
 
-  async function updatePreferences(preferences: string[]) {
+  async function updatePreferences(preferences: string[], brands: string[] = []) {
     if (!user) return;
     const { getFirestore, doc, setDoc } = await import("firebase/firestore");
     const db = getFirestore(app);
     const ref = doc(db, "users", user.uid);
-    await setDoc(ref, { preferences, onboardingComplete: true }, { merge: true });
-    setProfile((prev) => (prev ? { ...prev, preferences, onboardingComplete: true } : prev));
+    await setDoc(ref, { preferences, brands, onboardingComplete: true }, { merge: true });
+    setProfile((prev) => (prev ? { ...prev, preferences, brands, onboardingComplete: true } : prev));
   }
 
   return (
