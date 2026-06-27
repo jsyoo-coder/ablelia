@@ -297,6 +297,7 @@ export default function Home() {
           product={selectedProduct}
           onClose={() => setSelectedProduct(null)}
           onSelect={setSelectedProduct}
+          onSearchOpen={() => { setSelectedProduct(null); setTab("search"); }}
         />
       )}
       {/* Header */}

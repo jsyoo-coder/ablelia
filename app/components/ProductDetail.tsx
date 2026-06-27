@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Product } from "./ProductCard";
 import ProductCard from "./ProductCard";
 
@@ -21,10 +23,14 @@ function buildSimilarQuery(product: Product): string {
 }
 
 export default function ProductDetail({
-  product, onClose, onSelect,
+  product, onClose, onSelect, onSearchOpen,
 }: {
-  product: Product; onClose: () => void; onSelect: (p: Product) => void;
+  product: Product; onClose: () => void; onSelect: (p: Product) => void; onSearchOpen?: () => void;
 }) {
+  const router = useRouter();
+  const { user, profile, logout } = useAuth();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
   const title = product.title.replace(/<[^>]+>/g, "");
   const price = product.lprice ? Number(product.lprice).toLocaleString() : null;
   const label = product.brand || product.mallName || "";
@@ -51,6 +57,17 @@ export default function ProductDetail({
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = prev; };
+  }, []);
+
+  // 프로필 메뉴 외부 클릭 시 닫기
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   useLayoutEffect(() => {
@@ -126,13 +143,94 @@ export default function ProductDetail({
       style={{ background: "#F7F0E6", animation: "detailSlideUp 0.28s ease-out" }}
     >
       {/* ── Header ── */}
-      <div className="shrink-0 flex items-center px-4 pt-4 pb-3" style={headerBg}>
+      <div className="shrink-0 flex items-center justify-between px-4 pt-4 pb-3" style={headerBg}>
+        {/* 뒤로가기 */}
         <button onClick={onClose}
           className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-sm">
           <svg width="16" height="16" fill="none" stroke="#1A1A1A" strokeWidth="2.2" viewBox="0 0 24 24">
             <path d="M19 12H5M12 5l-7 7 7 7"/>
           </svg>
         </button>
+
+        {/* 우측: 검색 + 프로필 */}
+        <div className="flex items-center gap-3">
+          <button onClick={onSearchOpen}
+            className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
+            <svg width="16" height="16" fill="none" stroke="#1A1A1A" strokeWidth="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+          </button>
+
+          {user ? (
+            <div ref={profileMenuRef} className="relative">
+              <button
+                onClick={() => setShowProfileMenu(v => !v)}
+                className="flex items-center gap-1.5 bg-white rounded-full pl-1 pr-2.5 py-1 shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-7 h-7 rounded-full overflow-hidden shrink-0">
+                  {profile?.photoURL
+                    ? <img src={profile.photoURL} className="w-full h-full object-cover" alt="" referrerPolicy="no-referrer" />
+                    : <div className="w-full h-full bg-[#FF3D7F] flex items-center justify-center text-white text-xs font-bold">
+                        {profile?.displayName?.[0]}
+                      </div>
+                  }
+                </div>
+                <svg width="12" height="12" fill="none" stroke="#999" strokeWidth="2.5" viewBox="0 0 24 24"
+                  className={`transition-transform ${showProfileMenu ? "rotate-180" : ""}`}>
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </button>
+
+              {showProfileMenu && (
+                <div className="absolute right-0 top-12 w-64 bg-white rounded-3xl shadow-2xl overflow-hidden z-50"
+                  style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.15)" }}>
+                  <div className="px-4 pt-4 pb-2">
+                    <p className="text-[10px] text-gray-400 font-semibold mb-2">현재 로그인 계정</p>
+                    <div className="flex items-center gap-3 bg-[#F7F0E6] rounded-2xl p-3">
+                      <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 ring-2 ring-[#FF3D7F]">
+                        {profile?.photoURL
+                          ? <img src={profile.photoURL} className="w-full h-full object-cover" alt="" referrerPolicy="no-referrer" />
+                          : <div className="w-full h-full bg-[#FF3D7F] flex items-center justify-center text-white font-bold">
+                              {profile?.displayName?.[0]}
+                            </div>
+                        }
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-sm text-[#1A1A1A] truncate">{profile?.displayName}</p>
+                        <p className="text-[11px] text-gray-400 truncate">{profile?.email}</p>
+                      </div>
+                      <svg width="14" height="14" fill="none" stroke="#FF3D7F" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="mx-4 my-1 border-t border-gray-100" />
+                  <div className="px-2 pb-3">
+                    <button
+                      onClick={() => { setShowProfileMenu(false); router.push("/profile"); }}
+                      className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl hover:bg-[#F7F0E6] transition-colors text-left">
+                      <div className="w-8 h-8 bg-[#F7F0E6] rounded-full flex items-center justify-center shrink-0">
+                        <svg width="14" height="14" fill="none" stroke="#FF3D7F" strokeWidth="2" viewBox="0 0 24 24">
+                          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                        </svg>
+                      </div>
+                      <span className="text-sm font-semibold text-[#1A1A1A]">스타일 취향 설정</span>
+                    </button>
+                    <button
+                      onClick={async () => { setShowProfileMenu(false); await logout(); onClose(); }}
+                      className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl hover:bg-red-50 transition-colors text-left">
+                      <div className="w-8 h-8 bg-red-50 rounded-full flex items-center justify-center shrink-0">
+                        <svg width="14" height="14" fill="none" stroke="#ef4444" strokeWidth="2" viewBox="0 0 24 24">
+                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+                        </svg>
+                      </div>
+                      <span className="text-sm font-semibold text-red-500">로그아웃</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : null}
+        </div>
       </div>
 
       {/* ── PC 2단 레이아웃 (md+) ── */}
