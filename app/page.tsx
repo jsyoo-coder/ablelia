@@ -86,15 +86,10 @@ export default function Home() {
   const searchImgCacheRef = useRef<Record<string, string>>({});
   const [searchImgs, setSearchImgs] = useState<Record<string, string>>({});
 
-  // 비로그인 시 온보딩 표시 (최초 1회)
+  // 비로그인이면 항상 온보딩 표시 (새로고침 포함)
   useEffect(() => {
     if (loading) return;
-    if (!user) {
-      const seen = localStorage.getItem("ablelia_onboarding_seen");
-      if (!seen) setShowOnboarding(true);
-    } else {
-      setShowOnboarding(false);
-    }
+    setShowOnboarding(!user);
   }, [user, loading]);
 
   // localStorage 최근 검색어 로드
@@ -303,8 +298,13 @@ export default function Home() {
   }
 
   function handleOnboardingSkip() {
-    localStorage.setItem("ablelia_onboarding_seen", "1");
     setShowOnboarding(false);
+  }
+
+  // 비로그인 상태에서 상품 클릭 시 온보딩으로 복귀
+  function handleSelectProduct(product: ProductType) {
+    if (!user) { setShowOnboarding(true); return; }
+    setSelectedProduct(product);
   }
 
   function openSearch() {
@@ -341,7 +341,7 @@ export default function Home() {
           product={selectedProduct}
           likeCount={(selectedProduct as Product & { count?: number }).count}
           onClose={() => setSelectedProduct(null)}
-          onSelect={setSelectedProduct}
+          onSelect={handleSelectProduct}
           onSearchOpen={() => setTab("search")}
         />
       )}
@@ -567,7 +567,7 @@ export default function Home() {
                           product={item}
                           isNew={!item.count && i < 6}
                           likeCount={item.count}
-                          onSelect={setSelectedProduct}
+                          onSelect={handleSelectProduct}
                         />
                       ))}
                   </div>
@@ -674,7 +674,7 @@ export default function Home() {
               {Array.from({ length: masoncols }, (_, col) => col).map(col => (
                 <div key={col} className="flex-1 flex flex-col min-w-0">
                   {items.map((item, i) => ({ item, i })).filter(({ i }) => i % masoncols === col).map(({ item, i }) => (
-                    <ProductCard key={`${item.link}-${i}`} product={item} isNew={i < 6} onSelect={setSelectedProduct} />
+                    <ProductCard key={`${item.link}-${i}`} product={item} isNew={i < 6} onSelect={handleSelectProduct} />
                   ))}
                 </div>
               ))}
