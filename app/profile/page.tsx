@@ -20,17 +20,23 @@ const STYLES = [
 ];
 
 export default function ProfilePage() {
-  const { user, profile, logout, updatePreferences } = useAuth();
+  const { user, profile, loading, logout, updatePreferences } = useAuth();
   const router = useRouter();
-  const [selected, setSelected] = useState<string[]>(profile?.preferences ?? []);
+  const [selected, setSelected] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    if (!user || !profile) router.push("/");
-    else setSelected(profile.preferences ?? []);
-  }, [user, profile]);
+    if (loading) return;
+    if (!user || !profile) { router.push("/"); return; }
+    setSelected(profile.preferences ?? []);
+  }, [loading, user, profile]);
 
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "#F7F0E6" }}>
+      <div className="w-6 h-6 border-2 border-[#FF5C1A] border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
   if (!user || !profile) return null;
 
   function toggle(id: string) {
@@ -44,6 +50,7 @@ export default function ProfilePage() {
     await updatePreferences(selected);
     setSaving(false);
     setSaved(true);
+    setTimeout(() => router.push("/"), 800);
   }
 
   async function handleLogout() {
@@ -72,7 +79,7 @@ export default function ProfilePage() {
         {/* Avatar card */}
         <div className="bg-white rounded-3xl p-6 flex items-center gap-4 mb-6 shadow-sm">
           {profile.photoURL ? (
-            <img src={profile.photoURL} alt="" className="w-16 h-16 rounded-full" />
+            <img src={profile.photoURL} alt="" className="w-16 h-16 rounded-full" referrerPolicy="no-referrer" />
           ) : (
             <div className="w-16 h-16 rounded-full bg-[#FF5C1A] flex items-center justify-center text-white text-xl font-black">
               {profile.displayName?.[0]}

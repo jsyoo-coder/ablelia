@@ -108,14 +108,17 @@ export default function Home() {
     return () => observer.disconnect();
   }, [loadingMore, fetching, items.length, fetchItems]);
 
-  // 초기 피드
+  // 초기 피드 + 관심사 변경 시 재요청
+  const prefsKey = profile?.preferences?.join(",") ?? "";
   useEffect(() => {
     if (tab !== "feed" || loading) return;
-    const prefs = profile?.onboardingComplete ? profile.preferences : [];
+    const prefs = profile?.onboardingComplete ? (profile.preferences ?? []) : [];
     const pool = prefs.length > 0 ? prefs.map(p => STYLE_QUERIES[p] ?? p) : TRENDING;
     const q = pool[Math.floor(Math.random() * pool.length)];
+    setActiveStyle(null);
     fetchItems(q, 1, false);
-  }, [tab, loading, profile?.onboardingComplete]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, loading, prefsKey]);
 
   // 온보딩
   useEffect(() => {
@@ -236,7 +239,7 @@ export default function Home() {
                   <button onClick={() => router.push("/profile")}
                     className="w-9 h-9 rounded-full overflow-hidden shadow-sm">
                     {profile?.photoURL
-                      ? <img src={profile.photoURL} className="w-full h-full object-cover" alt="" />
+                      ? <img src={profile.photoURL} className="w-full h-full object-cover" alt="" referrerPolicy="no-referrer" />
                       : <div className="w-full h-full bg-[#FF5C1A] flex items-center justify-center text-white text-sm font-bold">
                           {profile?.displayName?.[0]}
                         </div>
@@ -443,7 +446,7 @@ export default function Home() {
           className="flex-1 py-3.5 flex justify-center items-center">
           <div className="w-11 h-11 rounded-full flex items-center justify-center">
             {user && profile?.photoURL
-              ? <img src={profile.photoURL} className="w-8 h-8 rounded-full" alt="" />
+              ? <img src={profile.photoURL} className="w-8 h-8 rounded-full" alt="" referrerPolicy="no-referrer" />
               : <svg width="20" height="20" fill="none" stroke="#BBB" strokeWidth="1.8" viewBox="0 0 24 24">
                   <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
                 </svg>
