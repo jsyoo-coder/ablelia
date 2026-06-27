@@ -116,16 +116,15 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
           paddingBottom: "max(env(safe-area-inset-bottom, 0px), 28px)",
         }}
       >
-        {/* 좌(오목)·우(볼록) 비대칭 상단 곡선 — SVG로 직접 그림 */}
+        {/* 좌 볼록(흰 영역 위로 솟음) · 우 오목(배경이 파고듦) — 80px 라운드 */}
         <svg
           className="absolute left-0 w-full pointer-events-none"
-          style={{ top: -52, height: 52 }}
-          viewBox="0 0 390 52"
+          style={{ top: -80, height: 80 }}
+          viewBox="0 0 390 80"
           preserveAspectRatio="none"
           fill="white"
         >
-          {/* 좌: Q 0 0 → 볼록(흰 영역이 위로 솟음), 우: Q 338 52 → 오목(배경이 파고듦) */}
-          <path d="M0 52 Q0 0 52 0 L338 0 Q338 52 390 52 Z" />
+          <path d="M0 80 Q0 0 80 0 L310 0 Q310 80 390 80 Z" />
         </svg>
         {/* 닷 인디케이터 */}
         <div className="flex justify-center gap-2 mb-7">
