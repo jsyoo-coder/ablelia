@@ -31,42 +31,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
+    let settled = false;
+
+    function finish() {
+      if (!settled) { settled = true; setLoading(false); }
+    }
+
+    // 5초 안에 Firebase가 응답 없으면 강제 로딩 해제
+    const timeout = setTimeout(finish, 5000);
 
     async function init() {
-      // getAuth / getFirestore는 브라우저(useEffect)에서만 호출
-      const { getAuth, onAuthStateChanged } = await import("firebase/auth");
-      const { getFirestore, doc, getDoc, setDoc } = await import("firebase/firestore");
-      const auth = getAuth(app);
-      const db = getFirestore(app);
+      try {
+        const { getAuth, onAuthStateChanged } = await import("firebase/auth");
+        const { getFirestore, doc, getDoc, setDoc } = await import("firebase/firestore");
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-      unsubscribe = onAuthStateChanged(auth, async (u) => {
-        setUser(u);
-        if (u) {
-          const ref = doc(db, "users", u.uid);
-          const snap = await getDoc(ref);
-          if (snap.exists()) {
-            setProfile(snap.data() as UserProfile);
-          } else {
-            const newProfile: UserProfile = {
-              uid: u.uid,
-              displayName: u.displayName ?? "",
-              photoURL: u.photoURL ?? "",
-              email: u.email ?? "",
-              preferences: [],
-              onboardingComplete: false,
-            };
-            await setDoc(ref, newProfile);
-            setProfile(newProfile);
+        unsubscribe = onAuthStateChanged(auth, async (u) => {
+          setUser(u);
+          try {
+            if (u) {
+              const ref = doc(db, "users", u.uid);
+              const snap = await getDoc(ref);
+              if (snap.exists()) {
+                setProfile(snap.data() as UserProfile);
+              } else {
+                const newProfile: UserProfile = {
+                  uid: u.uid,
+                  displayName: u.displayName ?? "",
+                  photoURL: u.photoURL ?? "",
+                  email: u.email ?? "",
+                  preferences: [],
+                  onboardingComplete: false,
+                };
+                await setDoc(ref, newProfile);
+                setProfile(newProfile);
+              }
+            } else {
+              setProfile(null);
+            }
+          } catch (err) {
+            console.error("Firestore error:", err);
+            setProfile(null);
+          } finally {
+            finish();
           }
-        } else {
-          setProfile(null);
-        }
-        setLoading(false);
-      });
+        });
+      } catch (err) {
+        console.error("Firebase init error:", err);
+        finish();
+      }
     }
 
     init();
-    return () => unsubscribe?.();
+    return () => { unsubscribe?.(); clearTimeout(timeout); };
   }, []);
 
   async function signInWithGoogle(): Promise<string | null> {
