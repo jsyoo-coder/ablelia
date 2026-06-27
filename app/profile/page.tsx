@@ -148,6 +148,22 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        {/* 찜한 상품 */}
+        <button onClick={() => router.push("/likes")}
+          className="w-full bg-white rounded-3xl p-4 flex items-center justify-between mb-6 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "#FFF0F5" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#FF3D7F">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+            </div>
+            <span className="text-sm font-bold text-[#1A1A1A]">찜한 상품 보기</span>
+          </div>
+          <svg width="16" height="16" fill="none" stroke="#ccc" strokeWidth="2.5" viewBox="0 0 24 24">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </button>
+
         {/* 성별 */}
         <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase mb-2">GENDER</p>
         <div className="flex gap-2 mb-6">

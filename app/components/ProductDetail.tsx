@@ -106,23 +106,32 @@ export default function ProductDetail({
     saveLikes(updated);
     setLiked(nowLiked);
 
-    // 로그인 상태일 때 Firestore 전체 좋아요 카운트 동기화
+    // 로그인 상태일 때 Firestore 동기화
     if (user) {
       try {
-        const { getFirestore, doc, setDoc, increment } = await import("firebase/firestore");
+        const { getFirestore, doc, setDoc, deleteDoc, increment, serverTimestamp } = await import("firebase/firestore");
         const { app } = await import("@/lib/firebase");
         const db = getFirestore(app);
-        const ref = doc(db, "product_likes", productDocId(product.link));
-        await setDoc(ref, {
-          link: product.link,
-          title: product.title,
-          image: product.image,
-          lprice: product.lprice,
-          brand: product.brand,
-          mallName: product.mallName,
-          category2: product.category2,
-          count: increment(nowLiked ? 1 : -1),
+        const docId = productDocId(product.link);
+
+        // 전체 좋아요 카운트
+        await setDoc(doc(db, "product_likes", docId), {
+          link: product.link, title: product.title, image: product.image,
+          lprice: product.lprice, brand: product.brand, mallName: product.mallName,
+          category2: product.category2, count: increment(nowLiked ? 1 : -1),
         }, { merge: true });
+
+        // 개인 찜 목록
+        const userRef = doc(db, "users", user.uid, "liked_products", docId);
+        if (nowLiked) {
+          await setDoc(userRef, {
+            link: product.link, title: product.title, image: product.image,
+            lprice: product.lprice, brand: product.brand, mallName: product.mallName,
+            category2: product.category2, likedAt: serverTimestamp(),
+          });
+        } else {
+          await deleteDoc(userRef);
+        }
       } catch (e) {
         console.error("좋아요 동기화 실패:", e);
       }
