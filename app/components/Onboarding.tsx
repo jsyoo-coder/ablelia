@@ -32,6 +32,8 @@ const SLIDES = [
   },
 ];
 
+const CURVE_H = 80;
+
 export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingProps) {
   const [step, setStep] = useState(0);
   const touchStartX = useRef(0);
@@ -89,7 +91,6 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
 
         {/* 중앙 태그 카드 */}
         <div className="relative z-10 flex flex-col items-center">
-          {/* 태그 구멍 */}
           <div className="w-4 h-4 rounded-full bg-white opacity-80 mb-2" />
           <div className="w-px h-4 bg-white opacity-40 mb-1" />
           <div className="bg-white rounded-3xl px-8 py-6 text-center"
@@ -103,7 +104,6 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
           </div>
         </div>
 
-        {/* 소형 장식 점 */}
         <div className="absolute w-3 h-3 rounded-full bg-white opacity-30 pointer-events-none" style={{ top: "22%", left: "18%" }} />
         <div className="absolute w-4 h-4 rounded-full bg-white opacity-20 pointer-events-none" style={{ bottom: "20%", right: "22%" }} />
         <div className="absolute w-2 h-2 rounded-full bg-white opacity-40 pointer-events-none" style={{ top: "55%", left: "12%" }} />
@@ -111,24 +111,29 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
 
       {/* 하단 흰색 카드 */}
       <div
-        className="relative bg-white px-6 pt-8 shrink-0"
+        className="relative bg-white px-6 shrink-0"
         style={{
+          paddingTop: CURVE_H,
           paddingBottom: "max(env(safe-area-inset-bottom, 0px), 28px)",
         }}
       >
-        {/* 좌 볼록(흰 영역 위로 솟음) · 우 오목(배경이 파고듦) — 80px 라운드 */}
+        {/*
+          좌: 볼록(흰 영역이 위로 솟음)  M0 H  Q0 0 R 0
+          우: 오목(배경이 파고듦)         L W-R 0  A R R 0 0 0 W H
+              sweep-flag=0 → 반시계방향 → 안쪽으로 파고드는 concave
+        */}
         <svg
           className="absolute left-0 w-full pointer-events-none"
-          style={{ top: -80, height: 80 }}
-          viewBox="0 0 390 80"
+          style={{ top: 0, height: CURVE_H }}
+          viewBox={`0 0 390 ${CURVE_H}`}
           preserveAspectRatio="none"
           fill="white"
         >
-          {/* 좌: 볼록 Q(베지어), 우: 오목 A(정원 호) — sweep=1로 안쪽으로 파고드는 방향 */}
-          <path d="M0 80 Q0 0 80 0 L310 0 A80 80 0 0 1 390 80 Z" />
+          <path d={`M0 ${CURVE_H} Q0 0 ${CURVE_H} 0 L${390 - CURVE_H} 0 A${CURVE_H} ${CURVE_H} 0 0 0 390 ${CURVE_H} Z`} />
         </svg>
+
         {/* 닷 인디케이터 */}
-        <div className="flex justify-center gap-2 mb-7">
+        <div className="flex justify-center gap-2 mb-6">
           {SLIDES.map((_, i) => (
             <button
               key={i}
@@ -144,44 +149,44 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
         </div>
 
         {/* 제목 */}
-        <h2
-          className="text-[22px] font-black text-[#1A1A1A] text-center mb-3 leading-snug whitespace-pre-line"
-        >
+        <h2 className="text-[22px] font-black text-[#1A1A1A] text-center mb-3 leading-snug whitespace-pre-line">
           {slide.title}
         </h2>
 
         {/* 설명 */}
-        <p className="text-[13px] text-gray-400 text-center leading-relaxed mb-7 whitespace-pre-line">
+        <p className="text-[13px] text-gray-400 text-center leading-relaxed whitespace-pre-line">
           {slide.desc}
         </p>
 
-        {/* 버튼 */}
-        {isLast ? (
-          <div className="flex flex-col gap-3">
+        {/* 버튼 영역 — 고정 높이로 슬라이드 전환 시 레이아웃 안 밀림 */}
+        <div className="mt-6" style={{ minHeight: 112 }}>
+          {isLast ? (
+            <>
+              <button
+                onClick={onLogin}
+                disabled={signingIn}
+                className="w-full py-4 rounded-2xl font-bold text-white text-[14px] transition-opacity disabled:opacity-60"
+                style={{ background: "linear-gradient(135deg, #FF3D7F 0%, #ff6fa3 100%)" }}
+              >
+                {signingIn ? "연결 중..." : "Google로 시작하기"}
+              </button>
+              <button
+                onClick={onSkip}
+                className="w-full py-3 text-[13px] font-semibold text-gray-400"
+              >
+                일단 둘러볼게요
+              </button>
+            </>
+          ) : (
             <button
-              onClick={onLogin}
-              disabled={signingIn}
-              className="w-full py-4 rounded-2xl font-bold text-white text-[14px] transition-opacity disabled:opacity-60"
-              style={{ background: "linear-gradient(135deg, #FF3D7F 0%, #ff6fa3 100%)" }}
+              onClick={() => setStep(s => s + 1)}
+              className="w-full py-4 rounded-2xl font-bold text-[14px] text-[#1A1A1A]"
+              style={{ background: "#F7F0E6" }}
             >
-              {signingIn ? "연결 중..." : "Google로 시작하기"}
+              다음
             </button>
-            <button
-              onClick={onSkip}
-              className="w-full py-3 text-[13px] font-semibold text-gray-400"
-            >
-              일단 둘러볼게요
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => setStep(s => s + 1)}
-            className="w-full py-4 rounded-2xl font-bold text-[14px] text-[#1A1A1A]"
-            style={{ background: "#F7F0E6" }}
-          >
-            다음
-          </button>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
