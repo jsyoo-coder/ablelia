@@ -88,6 +88,15 @@ export default function Home() {
     setRecentSearches(loadRecent());
   }, []);
 
+  // 프로필 페이지 등 이동 후 복귀 시 상품 상세 복원
+  useEffect(() => {
+    const saved = sessionStorage.getItem("ablelia_detail_product");
+    if (saved) {
+      try { setSelectedProduct(JSON.parse(saved)); } catch {}
+      sessionStorage.removeItem("ablelia_detail_product");
+    }
+  }, []);
+
   // 화면 너비에 따른 컬럼 수 (2/3/4)
   useLayoutEffect(() => {
     function update() {

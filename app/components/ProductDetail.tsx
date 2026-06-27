@@ -206,7 +206,11 @@ export default function ProductDetail({
                   <div className="mx-4 my-1 border-t border-gray-100" />
                   <div className="px-2 pb-3">
                     <button
-                      onClick={() => { setShowProfileMenu(false); router.push("/profile"); }}
+                      onClick={() => {
+                        sessionStorage.setItem("ablelia_detail_product", JSON.stringify(product));
+                        setShowProfileMenu(false);
+                        router.push("/profile");
+                      }}
                       className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl hover:bg-[#F7F0E6] transition-colors text-left">
                       <div className="w-8 h-8 bg-[#F7F0E6] rounded-full flex items-center justify-center shrink-0">
                         <svg width="14" height="14" fill="none" stroke="#FF3D7F" strokeWidth="2" viewBox="0 0 24 24">
