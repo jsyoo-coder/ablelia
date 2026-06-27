@@ -24,7 +24,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
   const [styleImgs, setStyleImgs] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -59,15 +59,14 @@ export default function ProfilePage() {
 
   function toggle(id: string) {
     setSelected(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
-    setSaved(false);
   }
 
   async function handleSave() {
     setSaving(true);
     try {
       await updatePreferences(selected, []);
-      setToast(true);
-      setTimeout(() => { setToast(false); router.push("/"); }, 1800);
+      setShowPopup(true);
+      setTimeout(() => { setShowPopup(false); router.push("/"); }, 2000);
     } catch (e) {
       console.error(e);
     } finally {
@@ -82,17 +81,23 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen pb-10" style={{ background: "#F7F0E6" }}>
-      {/* 토스트 */}
-      <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ${
-        toast ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3 pointer-events-none"
-      }`}>
-        <div className="flex items-center gap-2 bg-[#1A1A1A] text-white text-sm font-semibold px-5 py-3 rounded-2xl shadow-xl">
-          <svg width="16" height="16" fill="none" stroke="#FF3D7F" strokeWidth="3" viewBox="0 0 24 24">
-            <path d="M20 6L9 17l-5-5"/>
-          </svg>
-          취향이 저장됐어요
+
+      {/* 저장 완료 팝업 */}
+      {showPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30" />
+          <div className="relative bg-white rounded-3xl px-8 py-8 flex flex-col items-center gap-3 shadow-2xl mx-6">
+            <div className="w-14 h-14 bg-[#FF3D7F] rounded-full flex items-center justify-center">
+              <svg width="28" height="28" fill="none" stroke="white" strokeWidth="3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"/>
+              </svg>
+            </div>
+            <p className="text-lg font-black text-[#1A1A1A]">취향 저장 완료!</p>
+            <p className="text-sm text-gray-400 text-center">선택한 취향으로 피드가 업데이트됩니다</p>
+          </div>
         </div>
-      </div>
+      )}
+
       <header className="px-5 pt-5 pb-4 flex items-center justify-between">
         <button onClick={() => router.push("/")}
           className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-sm">
