@@ -50,6 +50,7 @@ button, [role="button"], a, label[for] { cursor: pointer; }
 
 /* ── 폰 프레임 (데스크탑) ── */
 #phone-power { display: none; }
+#status-bar  { display: none; }
 
 @media (min-width: 500px) {
   html {
@@ -122,12 +123,34 @@ button, [role="button"], a, label[for] { cursor: pointer; }
     border-radius: 47px;
     overflow: hidden;
     transform: translateZ(0);
-  }
-  #phone-screen {
-    width: 390px;
+    display: flex;
+    flex-direction: column;
     height: calc(100vh - 80px);
     max-height: 852px;
     min-height: 580px;
+  }
+  /* 상태바: 다이나믹 아일랜드 옆에 시간/아이콘 표시 */
+  #status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    height: 54px;
+    padding: 14px 28px 0;
+    background: #F7F0E6;
+    color: #1A1A1A;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  #status-icons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  #phone-screen {
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
     background: #F7F0E6;
