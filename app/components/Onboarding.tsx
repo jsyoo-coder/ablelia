@@ -37,6 +37,14 @@ const R = 80; // 코너 반지름
 export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingProps) {
   const [step, setStep] = useState(0);
   const touchStartX = useRef(0);
+
+  // 온보딩 표시 중 배경 스크롤 방지
+  useEffect(() => {
+    const el = document.getElementById("phone-screen") ?? document.body;
+    const prev = el.style.overflow;
+    el.style.overflow = "hidden";
+    return () => { el.style.overflow = prev; };
+  }, []);
   const slide = SLIDES[step];
   const isLast = step === SLIDES.length - 1;
 
