@@ -97,7 +97,7 @@ export default function ProductDetail({
     setLiked(!liked);
   }
 
-  const headerBg = { background: "rgba(247,240,230,0.97)", backdropFilter: "blur(12px)" };
+  const headerBg = { background: "rgba(247,240,230,0.97)", backdropFilter: "blur(12px)", zIndex: 20 } as React.CSSProperties;
 
   const SimilarGrid = () => (
     <div className="px-3 pt-4">
