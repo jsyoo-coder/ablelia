@@ -24,7 +24,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [toast, setToast] = useState(false);
   const [styleImgs, setStyleImgs] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -67,8 +67,8 @@ export default function ProfilePage() {
     setSaving(true);
     try {
       await updatePreferences(selected, []);
-      setSaved(true);
-      setTimeout(() => router.push("/"), 800);
+      setToast(true);
+      setTimeout(() => { setToast(false); router.push("/"); }, 1800);
     } catch (e) {
       console.error(e);
     } finally {
@@ -83,6 +83,17 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen pb-10" style={{ background: "#F7F0E6" }}>
+      {/* 토스트 */}
+      <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ${
+        toast ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3 pointer-events-none"
+      }`}>
+        <div className="flex items-center gap-2 bg-[#1A1A1A] text-white text-sm font-semibold px-5 py-3 rounded-2xl shadow-xl">
+          <svg width="16" height="16" fill="none" stroke="#FF3D7F" strokeWidth="3" viewBox="0 0 24 24">
+            <path d="M20 6L9 17l-5-5"/>
+          </svg>
+          취향이 저장됐어요
+        </div>
+      </div>
       <header className="px-5 pt-5 pb-4 flex items-center justify-between">
         <button onClick={() => router.push("/")}
           className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-sm">
@@ -142,7 +153,7 @@ export default function ProfilePage() {
           className={`w-full py-4 rounded-2xl text-sm font-bold transition-all ${
             selected.length >= 1 ? "bg-[#FF3D7F] text-white hover:bg-[#d42d6e] shadow-md" : "bg-white text-gray-300 cursor-not-allowed"
           }`}>
-          {saving ? "저장 중..." : saved ? "저장됨 ✓" : "취향 저장"}
+          {saving ? "저장 중..." : "취향 저장"}
         </button>
       </div>
     </div>
