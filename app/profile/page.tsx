@@ -23,7 +23,6 @@ export default function ProfilePage() {
   const { user, profile, loading, logout, updatePreferences } = useAuth();
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
-  const [saving, setSaving] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [styleImgs, setStyleImgs] = useState<Record<string, string>>({});
 
@@ -61,17 +60,10 @@ export default function ProfilePage() {
     setSelected(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
   }
 
-  async function handleSave() {
-    setSaving(true);
-    try {
-      await updatePreferences(selected, []);
-      setShowPopup(true);
-      setTimeout(() => { setShowPopup(false); router.push("/"); }, 2000);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setSaving(false);
-    }
+  function handleSave() {
+    setShowPopup(true);
+    updatePreferences(selected, []).catch(console.error);
+    setTimeout(() => { setShowPopup(false); router.push("/"); }, 2000);
   }
 
   async function handleLogout() {
@@ -153,9 +145,9 @@ export default function ProfilePage() {
           })}
         </div>
 
-        <button onClick={handleSave} disabled={saving}
+        <button onClick={handleSave}
           className="w-full py-4 rounded-2xl text-sm font-bold transition-all bg-[#FF3D7F] text-white hover:bg-[#d42d6e] shadow-md">
-          {saving ? "저장 중..." : "취향 저장"}
+          취향 저장
         </button>
       </div>
     </div>
