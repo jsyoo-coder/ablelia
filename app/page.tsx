@@ -490,11 +490,10 @@ export default function Home() {
       {/* Feed */}
       <div className="px-3 pt-4 max-w-screen-xl mx-auto relative z-0">
         {!fetching && items.length > 0 && (
-          <div className="flex items-center justify-between mb-3">
+          <div className="mb-3">
             <h2 className="text-xs font-black tracking-widest text-[#FF3D7F] uppercase">
               {tab === "search" ? "검색 결과" : (activeStyle ? STYLE_LABELS[activeStyle] : "NEW ITEMS")}
             </h2>
-            <span className="text-[10px] text-gray-400">{items.length}개</span>
           </div>
         )}
 
