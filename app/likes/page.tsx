@@ -101,6 +101,7 @@ export default function LikesPage() {
       {selectedProduct && (
         <ProductDetail
           product={selectedProduct}
+          likeCount={likeCounts[selectedProduct.link]}
           onClose={() => setSelectedProduct(null)}
           onSelect={setSelectedProduct}
           onSearchOpen={() => { setSelectedProduct(null); router.push("/"); }}

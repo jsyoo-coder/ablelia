@@ -323,6 +323,7 @@ export default function Home() {
       {selectedProduct && tab !== "search" && (
         <ProductDetail
           product={selectedProduct}
+          likeCount={(selectedProduct as Product & { count?: number }).count}
           onClose={() => setSelectedProduct(null)}
           onSelect={setSelectedProduct}
           onSearchOpen={() => setTab("search")}

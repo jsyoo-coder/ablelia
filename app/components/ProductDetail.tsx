@@ -32,9 +32,9 @@ function buildSimilarQuery(product: Product): string {
 }
 
 export default function ProductDetail({
-  product, onClose, onSelect, onSearchOpen,
+  product, onClose, onSelect, onSearchOpen, likeCount: initialLikeCount,
 }: {
-  product: Product; onClose: () => void; onSelect: (p: Product) => void; onSearchOpen?: () => void;
+  product: Product; onClose: () => void; onSelect: (p: Product) => void; onSearchOpen?: () => void; likeCount?: number;
 }) {
   const router = useRouter();
   const { user, profile, logout } = useAuth();
@@ -45,6 +45,7 @@ export default function ProductDetail({
   const label = product.brand || product.mallName || "";
 
   const [liked, setLiked] = useState(false);
+  const [globalLikeCount, setGlobalLikeCount] = useState(initialLikeCount ?? 0);
   const [similar, setSimilar] = useState<Product[]>([]);
   const [loadingSimilar, setLoadingSimilar] = useState(true);
   const [masoncols, setMasoncols] = useState(2);
@@ -84,6 +85,28 @@ export default function ProductDetail({
     pcScrollRef.current?.scrollTo(0, 0);
   }, [product.link]);
 
+  // 전체 좋아요 카운트 실시간 구독
+  useEffect(() => {
+    setGlobalLikeCount(initialLikeCount ?? 0);
+    let unsubscribe: (() => void) | undefined;
+    async function subscribe() {
+      try {
+        const { getFirestore, doc, onSnapshot } = await import("firebase/firestore");
+        const { app } = await import("@/lib/firebase");
+        const db = getFirestore(app);
+        unsubscribe = onSnapshot(
+          doc(db, "product_likes", productDocId(product.link)),
+          (snap) => {
+            if (snap.exists()) setGlobalLikeCount(snap.data().count ?? 0);
+          },
+          (e) => console.error("product_likes 구독 실패:", e)
+        );
+      } catch (e) { console.error("product_likes 구독 초기화 실패:", e); }
+    }
+    subscribe();
+    return () => unsubscribe?.();
+  }, [product.link]);
+
   useEffect(() => {
     setLiked(getLikes().includes(product.link));
     setLoadingSimilar(true);
@@ -105,6 +128,7 @@ export default function ProductDetail({
     const updated = liked ? current.filter(l => l !== product.link) : [...current, product.link];
     saveLikes(updated);
     setLiked(nowLiked);
+    setGlobalLikeCount(prev => Math.max(0, prev + (nowLiked ? 1 : -1)));
 
     // 로그인 상태일 때 Firestore 동기화
     if (user) {
@@ -310,13 +334,18 @@ export default function ProductDetail({
             {/* 좋아요 + 구매 버튼 */}
             <div className="flex gap-3">
               <button onClick={toggleLike}
-                className={`shrink-0 w-14 rounded-2xl flex items-center justify-center shadow-md transition-colors ${
+                className={`shrink-0 w-14 rounded-2xl flex flex-col items-center justify-center gap-0.5 py-2 shadow-md transition-colors ${
                   liked ? "bg-[#FF3D7F]" : "bg-white"
                 }`}>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill={liked ? "white" : "none"}
                   stroke={liked ? "none" : "#FF3D7F"} strokeWidth="2">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                 </svg>
+                {globalLikeCount > 0 && (
+                  <span className={`text-[10px] font-bold leading-none ${liked ? "text-white" : "text-[#FF3D7F]"}`}>
+                    {globalLikeCount}
+                  </span>
+                )}
               </button>
               <a href={product.link} target="_blank" rel="noopener noreferrer"
                 className="flex-1 flex items-center justify-center gap-2 py-4 bg-[#FF3D7F] text-white rounded-2xl font-bold text-sm shadow-md hover:bg-[#d42d6e] transition-colors">
@@ -361,13 +390,18 @@ export default function ProductDetail({
       <div className="md:hidden shrink-0 px-4 py-4 border-t border-black/5" style={headerBg}>
         <div className="flex gap-3">
           <button onClick={toggleLike}
-            className={`shrink-0 w-14 rounded-2xl flex items-center justify-center shadow-md transition-colors ${
+            className={`shrink-0 w-14 rounded-2xl flex flex-col items-center justify-center gap-0.5 py-2 shadow-md transition-colors ${
               liked ? "bg-[#FF3D7F]" : "bg-white"
             }`}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill={liked ? "white" : "none"}
               stroke={liked ? "none" : "#FF3D7F"} strokeWidth="2">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
+            {globalLikeCount > 0 && (
+              <span className={`text-[10px] font-bold leading-none ${liked ? "text-white" : "text-[#FF3D7F]"}`}>
+                {globalLikeCount}
+              </span>
+            )}
           </button>
           <a href={product.link} target="_blank" rel="noopener noreferrer"
             className="flex-1 flex items-center justify-center gap-2 py-4 bg-[#FF3D7F] text-white rounded-2xl font-bold text-sm shadow-md hover:bg-[#d42d6e] transition-colors">
