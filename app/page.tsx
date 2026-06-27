@@ -184,7 +184,7 @@ export default function Home() {
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: "#F7F0E6" }}>
-      <div className="w-6 h-6 border-2 border-[#FF5C1A] border-t-transparent rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 border-[#FF3D7F] border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
@@ -205,7 +205,7 @@ export default function Home() {
             <div className="flex items-center gap-2 w-full">
               <button
                 onClick={() => { setTab("feed"); setQuery(""); setShowDropdown(false); }}
-                className="text-gray-500 hover:text-[#FF5C1A] transition-colors shrink-0">
+                className="text-gray-500 hover:text-[#FF3D7F] transition-colors shrink-0">
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                   <path d="M19 12H5M12 5l-7 7 7 7"/>
                 </svg>
@@ -253,7 +253,7 @@ export default function Home() {
                       <div className="w-7 h-7 rounded-full overflow-hidden shrink-0">
                         {profile?.photoURL
                           ? <img src={profile.photoURL} className="w-full h-full object-cover" alt="" referrerPolicy="no-referrer" />
-                          : <div className="w-full h-full bg-[#FF5C1A] flex items-center justify-center text-white text-xs font-bold">
+                          : <div className="w-full h-full bg-[#FF3D7F] flex items-center justify-center text-white text-xs font-bold">
                               {profile?.displayName?.[0]}
                             </div>
                         }
@@ -272,10 +272,10 @@ export default function Home() {
                         <div className="px-4 pt-4 pb-2">
                           <p className="text-[10px] text-gray-400 font-semibold mb-2">현재 로그인 계정</p>
                           <div className="flex items-center gap-3 bg-[#F7F0E6] rounded-2xl p-3">
-                            <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 ring-2 ring-[#FF5C1A]">
+                            <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 ring-2 ring-[#FF3D7F]">
                               {profile?.photoURL
                                 ? <img src={profile.photoURL} className="w-full h-full object-cover" alt="" referrerPolicy="no-referrer" />
-                                : <div className="w-full h-full bg-[#FF5C1A] flex items-center justify-center text-white font-bold">
+                                : <div className="w-full h-full bg-[#FF3D7F] flex items-center justify-center text-white font-bold">
                                     {profile?.displayName?.[0]}
                                   </div>
                               }
@@ -284,7 +284,7 @@ export default function Home() {
                               <p className="font-bold text-sm text-[#1A1A1A] truncate">{profile?.displayName}</p>
                               <p className="text-[11px] text-gray-400 truncate">{profile?.email}</p>
                             </div>
-                            <svg width="14" height="14" fill="none" stroke="#FF5C1A" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <svg width="14" height="14" fill="none" stroke="#FF3D7F" strokeWidth="2.5" viewBox="0 0 24 24">
                               <path d="M20 6L9 17l-5-5"/>
                             </svg>
                           </div>
@@ -298,7 +298,7 @@ export default function Home() {
                             onClick={() => { setShowProfileMenu(false); router.push("/profile"); }}
                             className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl hover:bg-[#F7F0E6] transition-colors text-left">
                             <div className="w-8 h-8 bg-[#F7F0E6] rounded-full flex items-center justify-center shrink-0">
-                              <svg width="14" height="14" fill="none" stroke="#FF5C1A" strokeWidth="2" viewBox="0 0 24 24">
+                              <svg width="14" height="14" fill="none" stroke="#FF3D7F" strokeWidth="2" viewBox="0 0 24 24">
                                 <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
                               </svg>
                             </div>
@@ -322,7 +322,7 @@ export default function Home() {
                   <button
                     onClick={handleLogin}
                     disabled={signingIn}
-                    className="bg-[#FF5C1A] text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm hover:bg-[#e04e10] transition-colors disabled:opacity-60">
+                    className="bg-[#FF3D7F] text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm hover:bg-[#d42d6e] transition-colors disabled:opacity-60">
                     {signingIn ? "..." : "시작하기"}
                   </button>
                 )}
@@ -348,7 +348,7 @@ export default function Home() {
                 onClick={() => { setActiveStyle(p); fetchItems(STYLE_QUERIES[p], 1, false); }}
                 className={`shrink-0 text-xs font-semibold px-4 py-1.5 rounded-full transition-all ${
                   activeStyle === p
-                    ? "bg-[#FF5C1A] text-white shadow-sm"
+                    ? "bg-[#FF3D7F] text-white shadow-sm"
                     : "bg-white text-[#1A1A1A] shadow-sm hover:shadow-md"
                 }`}>
                 {STYLE_LABELS[p] ?? p}
@@ -369,7 +369,7 @@ export default function Home() {
             {recentSearches.length > 0 && (
               <div className="px-4 pt-4 pb-2">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-[10px] font-black tracking-widest text-[#FF5C1A] uppercase">최근 검색</p>
+                  <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase">최근 검색</p>
                   <button
                     onClick={() => { setRecentSearches([]); saveRecent([]); }}
                     className="text-[10px] text-gray-400 hover:text-gray-600">
@@ -405,7 +405,7 @@ export default function Home() {
 
             {/* 추천/검색 제안 */}
             <div className="px-4 pb-4 pt-2">
-              <p className="text-[10px] font-black tracking-widest text-[#FF5C1A] uppercase mb-2">
+              <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase mb-2">
                 {query.trim() ? "검색 제안" : "추천 검색어"}
               </p>
               {filteredSuggestions.length > 0 ? (
@@ -421,7 +421,7 @@ export default function Home() {
                       <span className="text-sm text-[#1A1A1A]">
                         {query.trim()
                           ? s.split(query).flatMap((part, i) =>
-                              i === 0 ? [part] : [<strong key={i} className="text-[#FF5C1A]">{query}</strong>, part]
+                              i === 0 ? [part] : [<strong key={i} className="text-[#FF3D7F]">{query}</strong>, part]
                             )
                           : s}
                       </span>
@@ -451,7 +451,7 @@ export default function Home() {
       <div className="px-3 pt-4 max-w-screen-xl mx-auto relative z-0">
         {!fetching && items.length > 0 && (
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-black tracking-widest text-[#FF5C1A] uppercase">
+            <h2 className="text-xs font-black tracking-widest text-[#FF3D7F] uppercase">
               {tab === "search" ? "검색 결과" : (activeStyle ? STYLE_LABELS[activeStyle] : "NEW ITEMS")}
             </h2>
             <span className="text-[10px] text-gray-400">{items.length}개</span>
@@ -481,7 +481,7 @@ export default function Home() {
 
         <div ref={sentinelRef} className="h-12 flex items-center justify-center mt-2">
           {loadingMore && (
-            <div className="w-5 h-5 border-2 border-[#EDE6DA] border-t-[#FF5C1A] rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-[#EDE6DA] border-t-[#FF3D7F] rounded-full animate-spin" />
           )}
         </div>
       </div>
@@ -493,7 +493,7 @@ export default function Home() {
           onClick={() => { setTab("feed"); setQuery(""); setActiveStyle(null); setShowDropdown(false); }}
           className="flex-1 py-3.5 flex justify-center items-center">
           <div className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
-            tab === "feed" ? "bg-[#FF5C1A] shadow-lg" : ""
+            tab === "feed" ? "bg-[#FF3D7F] shadow-lg" : ""
           }`}>
             <svg width="20" height="20" fill="none" stroke={tab === "feed" ? "#fff" : "#BBB"} strokeWidth="1.8" viewBox="0 0 24 24">
               <rect x="3" y="3" width="8" height="8" rx="2"/>
@@ -507,7 +507,7 @@ export default function Home() {
           onClick={openSearch}
           className="flex-1 py-3.5 flex justify-center items-center">
           <div className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
-            tab === "search" ? "bg-[#FF5C1A] shadow-lg" : ""
+            tab === "search" ? "bg-[#FF3D7F] shadow-lg" : ""
           }`}>
             <svg width="20" height="20" fill="none" stroke={tab === "search" ? "#fff" : "#BBB"} strokeWidth="1.8" viewBox="0 0 24 24">
               <circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/>

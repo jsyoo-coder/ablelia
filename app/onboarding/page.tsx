@@ -25,7 +25,7 @@ function StyleCard({ label, desc, on, img, onClick }: {
   return (
     <button onClick={onClick}
       className={`relative flex flex-col items-end justify-end overflow-hidden rounded-3xl transition-all aspect-square ${
-        on ? "ring-[3px] ring-[#FF5C1A] shadow-lg z-10" : "shadow-sm hover:shadow-md"
+        on ? "ring-[3px] ring-[#FF3D7F] shadow-lg z-10" : "shadow-sm hover:shadow-md"
       }`}>
       {img
         ? <img src={img} alt={label} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
@@ -33,12 +33,12 @@ function StyleCard({ label, desc, on, img, onClick }: {
       }
       <div className="absolute inset-0" style={{
         background: on
-          ? "linear-gradient(to top, rgba(255,92,26,0.85) 0%, rgba(255,92,26,0.3) 50%, rgba(0,0,0,0.1) 100%)"
+          ? "linear-gradient(to top, rgba(255,61,127,0.85) 0%, rgba(255,61,127,0.3) 50%, rgba(0,0,0,0.1) 100%)"
           : "linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.15) 55%, transparent 100%)",
       }} />
       {on && (
         <div className="absolute top-2 right-2 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow">
-          <svg width="11" height="11" fill="none" stroke="#FF5C1A" strokeWidth="3" viewBox="0 0 24 24">
+          <svg width="11" height="11" fill="none" stroke="#FF3D7F" strokeWidth="3" viewBox="0 0 24 24">
             <path d="M20 6L9 17l-5-5"/>
           </svg>
         </div>
@@ -95,11 +95,11 @@ export default function OnboardingPage() {
         <div className="mb-5">
           <h2 className="text-xl font-black text-[#1A1A1A] leading-snug">
             안녕하세요,<br />
-            <span className="text-[#FF5C1A]">{firstName}님</span>
+            <span className="text-[#FF3D7F]">{firstName}님</span>
           </h2>
         </div>
 
-        <p className="text-[10px] font-black tracking-widest text-[#FF5C1A] uppercase mb-1">CATEGORIES</p>
+        <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase mb-1">CATEGORIES</p>
         <p className="text-sm text-gray-500 mb-4">좋아하는 스타일을 <strong>3개 이상</strong> 골라주세요</p>
 
         <div className="grid grid-cols-3 gap-2.5 mb-8 flex-1">
@@ -115,7 +115,7 @@ export default function OnboardingPage() {
         <button onClick={handleDone} disabled={styles.length < 3 || saving}
           className={`w-full py-4 rounded-2xl text-sm font-bold transition-all ${
             styles.length >= 3
-              ? "bg-[#FF5C1A] text-white hover:bg-[#e04e10] shadow-md"
+              ? "bg-[#FF3D7F] text-white hover:bg-[#d42d6e] shadow-md"
               : "bg-white text-gray-300 cursor-not-allowed"
           }`}>
           {saving ? "저장 중..." : `시작하기 ${styles.length > 0 ? `(${styles.length}개)` : ""}`}

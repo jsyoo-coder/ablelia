@@ -32,14 +32,14 @@ export default function ProductCard({ product, isNew }: { product: Product; isNe
             />
           )}
           {isNew && (
-            <div className="absolute top-2 left-2 bg-[#FF5C1A] text-white text-[9px] font-bold px-2 py-0.5 rounded-full tracking-wide">
+            <div className="absolute top-2 left-2 bg-[#FF3D7F] text-white text-[9px] font-bold px-2 py-0.5 rounded-full tracking-wide">
               NEW IN
             </div>
           )}
           {/* Save button */}
           <button
             onClick={(e) => e.preventDefault()}
-            className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-[#FF5C1A] text-white rounded-full w-7 h-7 flex items-center justify-center shadow-md text-sm font-bold"
+            className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-[#FF3D7F] text-white rounded-full w-7 h-7 flex items-center justify-center shadow-md text-sm font-bold"
           >
             +
           </button>
@@ -52,7 +52,7 @@ export default function ProductCard({ product, isNew }: { product: Product; isNe
           )}
           <p className="text-xs font-semibold leading-tight line-clamp-2 text-[#1A1A1A] mb-1">{title}</p>
           {price && (
-            <p className="text-sm font-bold text-[#FF5C1A]">{price}원</p>
+            <p className="text-sm font-bold text-[#FF3D7F]">{price}원</p>
           )}
         </div>
       </div>

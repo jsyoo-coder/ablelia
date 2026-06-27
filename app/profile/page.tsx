@@ -52,7 +52,7 @@ export default function ProfilePage() {
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: "#F7F0E6" }}>
-      <div className="w-6 h-6 border-2 border-[#FF5C1A] border-t-transparent rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 border-[#FF3D7F] border-t-transparent rounded-full animate-spin" />
     </div>
   );
   if (!user || !profile) return null;
@@ -92,7 +92,7 @@ export default function ProfilePage() {
         </button>
         <h1 className="text-sm font-black tracking-widest uppercase text-[#1A1A1A]">프로필</h1>
         <button onClick={handleLogout}
-          className="text-xs font-semibold text-gray-400 hover:text-[#FF5C1A] transition-colors">
+          className="text-xs font-semibold text-gray-400 hover:text-[#FF3D7F] transition-colors">
           로그아웃
         </button>
       </header>
@@ -102,18 +102,18 @@ export default function ProfilePage() {
           {profile.photoURL ? (
             <img src={profile.photoURL} alt="" className="w-14 h-14 rounded-full shrink-0" referrerPolicy="no-referrer" />
           ) : (
-            <div className="w-14 h-14 rounded-full bg-[#FF5C1A] flex items-center justify-center text-white text-xl font-black shrink-0">
+            <div className="w-14 h-14 rounded-full bg-[#FF3D7F] flex items-center justify-center text-white text-xl font-black shrink-0">
               {profile.displayName?.[0]}
             </div>
           )}
           <div className="min-w-0">
             <p className="font-bold text-[#1A1A1A] truncate">{profile.displayName}</p>
             <p className="text-xs text-gray-400 mt-0.5 truncate">{profile.email}</p>
-            <p className="text-xs text-[#FF5C1A] font-semibold mt-1">스타일 {selected.length}개 선택</p>
+            <p className="text-xs text-[#FF3D7F] font-semibold mt-1">스타일 {selected.length}개 선택</p>
           </div>
         </div>
 
-        <p className="text-[10px] font-black tracking-widest text-[#FF5C1A] uppercase mb-1">CATEGORIES</p>
+        <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase mb-1">CATEGORIES</p>
         <p className="text-xs text-gray-400 mb-3">최소 3개 선택 · 홈 피드에 반영됩니다</p>
         <div className="grid grid-cols-3 gap-2.5 mb-6">
           {STYLES.map(s => {
@@ -122,13 +122,13 @@ export default function ProfilePage() {
             return (
               <button key={s.id} onClick={() => toggle(s.id)}
                 className={`relative flex flex-col items-end justify-end overflow-hidden rounded-3xl transition-all aspect-square ${
-                  on ? "ring-[3px] ring-[#FF5C1A] shadow-lg z-10" : "shadow-sm hover:shadow-md"
+                  on ? "ring-[3px] ring-[#FF3D7F] shadow-lg z-10" : "shadow-sm hover:shadow-md"
                 }`}>
                 {img ? <img src={img} alt={s.label} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
                   : <div className="absolute inset-0 bg-[#EDE6DA] animate-pulse" />}
-                <div className="absolute inset-0" style={{ background: on ? "linear-gradient(to top, rgba(255,92,26,0.85) 0%, rgba(255,92,26,0.3) 50%, rgba(0,0,0,0.1) 100%)" : "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)" }} />
+                <div className="absolute inset-0" style={{ background: on ? "linear-gradient(to top, rgba(255,61,127,0.85) 0%, rgba(255,61,127,0.3) 50%, rgba(0,0,0,0.1) 100%)" : "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)" }} />
                 {on && <div className="absolute top-2 right-2 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow">
-                  <svg width="11" height="11" fill="none" stroke="#FF5C1A" strokeWidth="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+                  <svg width="11" height="11" fill="none" stroke="#FF3D7F" strokeWidth="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
                 </div>}
                 <div className="relative z-10 pb-2.5 px-2 w-full">
                   <p className="text-white text-xs font-black drop-shadow">{s.label}</p>
@@ -140,7 +140,7 @@ export default function ProfilePage() {
 
         <button onClick={handleSave} disabled={selected.length < 3 || saving}
           className={`w-full py-4 rounded-2xl text-sm font-bold transition-all ${
-            selected.length >= 3 ? "bg-[#FF5C1A] text-white hover:bg-[#e04e10] shadow-md" : "bg-white text-gray-300 cursor-not-allowed"
+            selected.length >= 3 ? "bg-[#FF3D7F] text-white hover:bg-[#d42d6e] shadow-md" : "bg-white text-gray-300 cursor-not-allowed"
           }`}>
           {saving ? "저장 중..." : saved ? "저장됨 ✓" : "취향 저장"}
         </button>
