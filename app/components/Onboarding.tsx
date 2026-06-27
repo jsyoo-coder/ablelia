@@ -38,12 +38,16 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
   const [step, setStep] = useState(0);
   const touchStartX = useRef(0);
 
-  // 온보딩 표시 중 배경 스크롤 방지
+  // 온보딩 표시 중 배경 스크롤 전면 차단
   useEffect(() => {
-    const el = document.getElementById("phone-screen") ?? document.body;
-    const prev = el.style.overflow;
-    el.style.overflow = "hidden";
-    return () => { el.style.overflow = prev; };
+    const targets = [
+      document.getElementById("phone-screen"),
+      document.body,
+      document.documentElement,
+    ].filter(Boolean) as HTMLElement[];
+    const prevs = targets.map(el => el.style.overflow);
+    targets.forEach(el => { el.style.overflow = "hidden"; });
+    return () => { targets.forEach((el, i) => { el.style.overflow = prevs[i]; }); };
   }, []);
   const slide = SLIDES[step];
   const isLast = step === SLIDES.length - 1;
@@ -66,6 +70,7 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
       }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
+      onTouchMove={e => e.stopPropagation()}
     >
       {/* 상단 일러스트 영역 */}
       <div className="flex-1 relative flex items-center justify-center overflow-hidden min-h-0">
