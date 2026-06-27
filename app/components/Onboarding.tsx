@@ -122,9 +122,9 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
           preserveAspectRatio="none"
           fill="white"
         >
-          {/* 좌 볼록: 제어점(0,0) → 흰 영역이 좌상단으로 솟음
-               우 오목: 제어점(390-R,R) → 배경이 우상단에서 파고듦 */}
-          <path d={`M0 ${R} Q0 0 ${R} 0 L${390-R} 0 Q${390-R} ${R} 390 ${R} Z`} />
+          {/* 좌 오목: 제어점(R,R) → 배경이 좌상단 파고듦
+               우 볼록: 제어점(390,0) → 흰 영역이 우상단으로 솟음 */}
+          <path d={`M0 ${R} Q${R} ${R} ${R} 0 L${390-R} 0 Q390 0 390 ${R} Z`} />
         </svg>
 
         {/* 닷 인디케이터 */}
