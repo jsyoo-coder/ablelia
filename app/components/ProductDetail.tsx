@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import type { Product } from "./ProductCard";
 import ProductCard from "./ProductCard";
 
@@ -32,6 +32,24 @@ export default function ProductDetail({
   const [liked, setLiked] = useState(false);
   const [similar, setSimilar] = useState<Product[]>([]);
   const [loadingSimilar, setLoadingSimilar] = useState(true);
+  const [masoncols, setMasoncols] = useState(2);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    function update() {
+      const w = window.innerWidth;
+      // PC 우측 패널(~50% 너비) 기준: 1280px+ → 3열, 나머지 → 2열
+      setMasoncols(w >= 1280 ? 3 : 2);
+    }
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  // 유사 상품 클릭 시 스크롤 맨 위로
+  useLayoutEffect(() => {
+    scrollRef.current?.scrollTo(0, 0);
+  }, [product.link]);
 
   useEffect(() => {
     setLiked(getLikes().includes(product.link));
@@ -55,14 +73,15 @@ export default function ProductDetail({
     setLiked(!liked);
   }
 
+  const headerBg = { background: "rgba(247,240,230,0.97)", backdropFilter: "blur(12px)" };
+
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col"
       style={{ background: "#F7F0E6", animation: "detailSlideUp 0.28s ease-out" }}
     >
-      {/* Header */}
-      <div className="shrink-0 flex items-center justify-between px-4 pt-4 pb-3"
-        style={{ background: "rgba(247,240,230,0.97)", backdropFilter: "blur(12px)" }}>
+      {/* ── Header ── */}
+      <div className="shrink-0 flex items-center justify-between px-4 pt-4 pb-3" style={headerBg}>
         <button onClick={onClose}
           className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-sm">
           <svg width="16" height="16" fill="none" stroke="#1A1A1A" strokeWidth="2.2" viewBox="0 0 24 24">
@@ -80,67 +99,91 @@ export default function ProductDetail({
         </button>
       </div>
 
-      {/* Scrollable body */}
-      <div className="flex-1 overflow-y-auto pb-24">
-        {/* Product image */}
-        <div className="bg-white mx-3 mt-1 rounded-3xl overflow-hidden shadow-sm">
-          {product.image && (
-            <img src={product.image} alt={title} className="w-full h-auto block" />
-          )}
+      {/* ── Body ── */}
+      <div className="flex-1 min-h-0 flex flex-col md:flex-row">
+
+        {/* PC 전용 좌측 이미지 패널 */}
+        <div className="hidden md:flex md:w-[52%] min-h-0 items-start justify-center overflow-y-auto p-6">
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm w-full max-w-lg">
+            {product.image && (
+              <img src={product.image} alt={title} className="w-full h-auto block" />
+            )}
+          </div>
         </div>
 
-        {/* Product info */}
-        <div className="px-4 pt-4 pb-2">
-          {label && (
-            <p className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold mb-1">{label}</p>
-          )}
-          <p className="text-base font-bold text-[#1A1A1A] leading-snug mb-2">{title}</p>
-          {price && (
-            <p className="text-2xl font-black text-[#FF3D7F]">{price}원</p>
-          )}
-        </div>
+        {/* 우측(PC) / 전체(모바일) 스크롤 패널 */}
+        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto pb-24 md:pb-6">
 
-        {/* Similar products */}
-        <div className="px-3 pt-4">
-          <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase mb-3">유사 상품</p>
-          {loadingSimilar ? (
-            <div className="flex gap-3">
-              {[0, 1].map(col => (
-                <div key={col} className="flex-1 flex flex-col min-w-0">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="mb-3 rounded-3xl bg-white animate-pulse shadow-sm overflow-hidden">
-                      <div className="rounded-3xl m-2" style={{ height: `${150 + (i % 3) * 40}px`, background: "#EDE6DA" }} />
-                      <div className="px-3 py-2.5 space-y-1.5">
-                        <div className="h-2 bg-gray-100 rounded-full w-16" />
-                        <div className="h-3 bg-gray-100 rounded-full w-full" />
+          {/* 모바일 전용 이미지 */}
+          <div className="md:hidden bg-white mx-3 mt-1 rounded-3xl overflow-hidden shadow-sm">
+            {product.image && (
+              <img src={product.image} alt={title} className="w-full h-auto block" />
+            )}
+          </div>
+
+          {/* 상품 정보 */}
+          <div className="px-5 pt-5 pb-3">
+            {label && (
+              <p className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold mb-1">{label}</p>
+            )}
+            <p className="text-lg font-bold text-[#1A1A1A] leading-snug mb-3">{title}</p>
+            {price && (
+              <p className="text-3xl font-black text-[#FF3D7F]">{price}원</p>
+            )}
+          </div>
+
+          {/* PC 전용 구매 버튼 (인라인) */}
+          <div className="hidden md:block px-5 pb-6">
+            <a href={product.link} target="_blank" rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-4 bg-[#FF3D7F] text-white rounded-2xl font-bold text-sm shadow-md hover:bg-[#d42d6e] transition-colors">
+              구매하러 가기
+              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </a>
+          </div>
+
+          {/* 유사 상품 */}
+          <div className="px-3 pt-2 md:pt-0">
+            <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase mb-3 px-1">유사 상품</p>
+            {loadingSimilar ? (
+              <div className="flex gap-3">
+                {Array.from({ length: masoncols }, (_, col) => col).map(col => (
+                  <div key={col} className="flex-1 flex flex-col min-w-0">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="mb-3 rounded-3xl bg-white animate-pulse shadow-sm overflow-hidden">
+                        <div className="rounded-3xl m-2" style={{ height: `${150 + (i % 3) * 40}px`, background: "#EDE6DA" }} />
+                        <div className="px-3 py-2.5 space-y-1.5">
+                          <div className="h-2 bg-gray-100 rounded-full w-16" />
+                          <div className="h-3 bg-gray-100 rounded-full w-full" />
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          ) : similar.length > 0 ? (
-            <div className="flex gap-3">
-              {[0, 1].map(col => (
-                <div key={col} className="flex-1 flex flex-col min-w-0">
-                  {similar
-                    .map((item, i) => ({ item, i }))
-                    .filter(({ i }) => i % 2 === col)
-                    .map(({ item, i }) => (
-                      <ProductCard key={`${item.link}-${i}`} product={item} onSelect={onSelect} />
                     ))}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-gray-400 text-center py-8">유사 상품을 찾을 수 없어요</p>
-          )}
+                  </div>
+                ))}
+              </div>
+            ) : similar.length > 0 ? (
+              <div className="flex gap-3">
+                {Array.from({ length: masoncols }, (_, col) => col).map(col => (
+                  <div key={col} className="flex-1 flex flex-col min-w-0">
+                    {similar
+                      .map((item, i) => ({ item, i }))
+                      .filter(({ i }) => i % masoncols === col)
+                      .map(({ item, i }) => (
+                        <ProductCard key={`${item.link}-${i}`} product={item} onSelect={onSelect} />
+                      ))}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400 text-center py-8">유사 상품을 찾을 수 없어요</p>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Sticky buy button */}
-      <div className="shrink-0 px-4 py-4 border-t border-black/5"
-        style={{ background: "rgba(247,240,230,0.97)", backdropFilter: "blur(12px)" }}>
+      {/* 모바일 전용 하단 고정 구매 버튼 */}
+      <div className="md:hidden shrink-0 px-4 py-4 border-t border-black/5" style={headerBg}>
         <a href={product.link} target="_blank" rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 w-full py-4 bg-[#FF3D7F] text-white rounded-2xl font-bold text-sm shadow-md hover:bg-[#d42d6e] transition-colors">
           구매하러 가기
