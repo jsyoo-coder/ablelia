@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import ProductCard from "./components/ProductCard";
 import type { Product as ProductType } from "./components/ProductCard";
 import ProductDetail from "./components/ProductDetail";
+import Onboarding from "./components/Onboarding";
 
 const STYLE_QUERIES: Record<string, string> = {
   minimal: "미니멀 베이직 패션",
@@ -73,6 +74,7 @@ export default function Home() {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [signingIn, setSigningIn] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [searchSubmitted, setSearchSubmitted] = useState(false);
   const masoncols = 2;
   const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(null);
@@ -83,6 +85,17 @@ export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
   const searchImgCacheRef = useRef<Record<string, string>>({});
   const [searchImgs, setSearchImgs] = useState<Record<string, string>>({});
+
+  // 비로그인 시 온보딩 표시 (최초 1회)
+  useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      const seen = localStorage.getItem("ablelia_onboarding_seen");
+      if (!seen) setShowOnboarding(true);
+    } else {
+      setShowOnboarding(false);
+    }
+  }, [user, loading]);
 
   // localStorage 최근 검색어 로드
   useEffect(() => {
@@ -285,7 +298,13 @@ export default function Home() {
     setLoginError(null);
     const err = await signInWithGoogle();
     if (err) setLoginError(err);
+    else setShowOnboarding(false);
     setSigningIn(false);
+  }
+
+  function handleOnboardingSkip() {
+    localStorage.setItem("ablelia_onboarding_seen", "1");
+    setShowOnboarding(false);
   }
 
   function openSearch() {
@@ -310,6 +329,13 @@ export default function Home() {
 
   return (
     <div className="min-h-screen pb-6" style={{ background: "#F7F0E6" }}>
+      {showOnboarding && (
+        <Onboarding
+          onLogin={handleLogin}
+          onSkip={handleOnboardingSkip}
+          signingIn={signingIn}
+        />
+      )}
       {selectedProduct && tab !== "search" && (
         <ProductDetail
           product={selectedProduct}
