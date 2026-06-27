@@ -75,7 +75,7 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col"
-      style={{ background: "#000" }}
+      style={{ background: SLIDES[step].statusBg, transition: "background 0.35s ease" }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onTouchMove={e => e.stopPropagation()}
