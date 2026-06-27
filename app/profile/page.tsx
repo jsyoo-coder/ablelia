@@ -63,7 +63,6 @@ export default function ProfilePage() {
   }
 
   async function handleSave() {
-    if (selected.length < 1) return;
     setSaving(true);
     try {
       await updatePreferences(selected, []);
@@ -149,10 +148,8 @@ export default function ProfilePage() {
           })}
         </div>
 
-        <button onClick={handleSave} disabled={selected.length < 1 || saving}
-          className={`w-full py-4 rounded-2xl text-sm font-bold transition-all ${
-            selected.length >= 1 ? "bg-[#FF3D7F] text-white hover:bg-[#d42d6e] shadow-md" : "bg-white text-gray-300 cursor-not-allowed"
-          }`}>
+        <button onClick={handleSave} disabled={saving}
+          className="w-full py-4 rounded-2xl text-sm font-bold transition-all bg-[#FF3D7F] text-white hover:bg-[#d42d6e] shadow-md">
           {saving ? "저장 중..." : "취향 저장"}
         </button>
       </div>
