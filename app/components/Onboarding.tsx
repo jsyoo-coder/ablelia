@@ -108,26 +108,18 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
       <div
         className="relative bg-white px-6 pt-2 shrink-0"
         style={{
-          borderRadius: "44px 0 0 44px",
+          borderRadius: `${R}px 0 0 0`,
           paddingBottom: "max(env(safe-area-inset-bottom, 0px), 28px)",
         }}
       >
-        {/*
-          SVG를 카드 위(top: -R)에 겹쳐서 그림 → 카드 내부는 pt-5만 사용, 여백 최소화
-          좌: Q0 0 R 0  → 볼록(convex) — 흰 영역이 좌상단으로 솟음
-          우: A R R 0 0 0 390 R → 오목(concave) — 배경이 우상단에서 파고듦
-              sweep=0(반시계방향)이 concave
-        */}
+        {/* 우측 상단에만 오목 SVG (R×R) — 좌측 상단 라운드는 CSS border-radius 처리 */}
         <svg
-          className="absolute left-0 w-full pointer-events-none"
-          style={{ top: -R, height: R }}
-          viewBox={`0 0 390 ${R}`}
-          preserveAspectRatio="none"
+          className="absolute right-0 pointer-events-none"
+          style={{ top: -R, height: R, width: R }}
+          viewBox={`0 0 ${R} ${R}`}
           fill="white"
         >
-          {/* 좌 오목: 제어점(R,R) → 배경이 좌상단 파고듦
-               우 볼록: 제어점(390,0) → 흰 영역이 우상단으로 솟음 */}
-          <path d={`M0 ${R} Q${R} ${R} ${R} 0 L${390-R} 0 Q390 0 390 ${R} Z`} />
+          <path d={`M0 ${R} L${R} ${R} Q${R} 0 0 0 Z`} />
         </svg>
 
         {/* 닷 인디케이터 */}
