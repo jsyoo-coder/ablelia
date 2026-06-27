@@ -9,9 +9,9 @@ interface OnboardingProps {
 }
 
 const SLIDES = [
-  { title: "국내 모든 패션\n한눈에 비교", desc: "무신사·에이블리·지그재그\n가격을 앱 하나로 비교하세요", statusBg: "#b2b1b2" },
-  { title: "지금 인기 있는\n아이템 먼저", desc: "가장 많이 찜 받은 상품을\n실시간으로 발견하세요", statusBg: "#eae5e7" },
-  { title: "로그인하고\n내 스타일 저장", desc: "취향에 맞는 상품 추천과\n찜 목록을 언제나 확인하세요", statusBg: "#cfccc7" },
+  { title: "국내 모든 패션\n한눈에 비교", desc: "무신사·에이블리·지그재그\n가격을 앱 하나로 비교하세요", statusBg: "#b1b1b2", bottomBg: "#817673" },
+  { title: "지금 인기 있는\n아이템 먼저", desc: "가장 많이 찜 받은 상품을\n실시간으로 발견하세요", statusBg: "#eae5e6", bottomBg: "#d4c7c2" },
+  { title: "로그인하고\n내 스타일 저장", desc: "취향에 맞는 상품 추천과\n찜 목록을 언제나 확인하세요", statusBg: "#cfccc7", bottomBg: "#93887f" },
 ];
 
 const R = 80;
@@ -81,9 +81,7 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
     <div
       className="fixed inset-0 z-50 flex flex-col"
       style={{
-        backgroundImage: `url(/images/onboarding/step${step + 1}.png)`,
-        backgroundSize: "cover",
-        backgroundPosition: "top center",
+        background: `linear-gradient(to bottom, ${SLIDES[step].statusBg}, ${SLIDES[step].bottomBg})`,
       }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
