@@ -119,7 +119,7 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
 
       {/* 하단 흰색 카드 */}
       <div
-        className="relative bg-white px-6 pt-2 shrink-0"
+        className="relative bg-white px-6 pt-7 shrink-0"
         style={{
           borderRadius: `${R}px 0 0 0`,
           paddingBottom: "max(env(safe-area-inset-bottom, 0px), 28px)",
