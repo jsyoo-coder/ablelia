@@ -49,41 +49,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         unsubscribe = onAuthStateChanged(auth, async (u) => {
           setUser(u);
+          if (!u) { setProfile(null); finish(); return; }
+
+          // u.photoURL이 null인 경우 providerData(구글 등)에서 직접 가져옴
+          const freshPhoto = u.photoURL
+            || u.providerData?.find(p => p.photoURL)?.photoURL
+            || "";
+          const freshName = u.displayName
+            || u.providerData?.find(p => p.displayName)?.displayName
+            || "";
+
+          // Firestore 실패해도 Auth 기본값으로 프로필 표시
+          const authFallback: UserProfile = {
+            uid: u.uid,
+            photoURL: freshPhoto,
+            displayName: freshName,
+            email: u.email ?? "",
+            preferences: [],
+            onboardingComplete: false,
+          };
+
           try {
-            if (u) {
-              const ref = doc(db, "users", u.uid);
-              const snap = await getDoc(ref);
-              // Firebase Auth의 photoURL/displayName은 항상 최신 — Firestore 값 위에 덮어씀
-              const authOverride = {
-                photoURL: u.photoURL ?? "",
-                displayName: u.displayName ?? "",
-                email: u.email ?? "",
+            const ref = doc(db, "users", u.uid);
+            const snap = await getDoc(ref);
+
+            if (snap.exists()) {
+              const stored = snap.data() as UserProfile;
+              // Auth 값이 있을 때만 Firestore 값을 덮어씀
+              const merged: UserProfile = {
+                ...stored,
+                ...(freshPhoto ? { photoURL: freshPhoto } : {}),
+                ...(freshName ? { displayName: freshName } : {}),
+                email: u.email ?? stored.email,
               };
-              if (snap.exists()) {
-                const stored = snap.data() as UserProfile;
-                const merged = { ...stored, ...authOverride };
-                // photoURL이 바뀌었으면 Firestore도 업데이트
-                if (stored.photoURL !== authOverride.photoURL && authOverride.photoURL) {
-                  const { updateDoc } = await import("firebase/firestore");
-                  await updateDoc(ref, { photoURL: authOverride.photoURL });
-                }
-                setProfile(merged);
-              } else {
-                const newProfile: UserProfile = {
-                  uid: u.uid,
-                  preferences: [],
-                  onboardingComplete: false,
-                  ...authOverride,
-                };
-                await setDoc(ref, newProfile);
-                setProfile(newProfile);
+              // photoURL이 달라졌으면 Firestore도 업데이트
+              if (freshPhoto && stored.photoURL !== freshPhoto) {
+                const { updateDoc } = await import("firebase/firestore");
+                await updateDoc(ref, { photoURL: freshPhoto });
               }
+              setProfile(merged);
             } else {
-              setProfile(null);
+              await setDoc(ref, authFallback);
+              setProfile(authFallback);
             }
           } catch (err) {
             console.error("Firestore error:", err);
-            setProfile(null);
+            // Firestore 실패해도 Auth 정보로 기본 표시
+            setProfile(authFallback);
           } finally {
             finish();
           }
