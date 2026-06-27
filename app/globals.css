@@ -4,9 +4,8 @@
 /* 케리스 케듀체 Line — public/fonts/ 에 파일 추가 후 활성화 */
 @font-face {
   font-family: 'KERISKedu';
-  src: url('/fonts/KERISKeduLine.woff2') format('woff2'),
-       url('/fonts/KERISKeduLine.woff') format('woff'),
-       url('/fonts/KERISKeduLine.ttf') format('truetype');
+  src: url('/fonts/KERISKEDU_Line.otf') format('opentype'),
+       url('/fonts/KERISKEDU_Line.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
