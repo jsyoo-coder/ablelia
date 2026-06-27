@@ -71,6 +71,8 @@ export default function Home() {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchImgCacheRef = useRef<Record<string, string>>({});
+  const [searchImgs, setSearchImgs] = useState<Record<string, string>>({});
 
   // localStorage 최근 검색어 로드
   useEffect(() => {
@@ -161,6 +163,29 @@ export default function Home() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, loading, prefsKey]);
 
+
+  // 드롭다운 열릴 때 검색어별 썸네일 로드 (캐시)
+  useEffect(() => {
+    if (!showDropdown) return;
+    const targets = [...new Set([...SUGGESTIONS.slice(0, 10), ...recentSearches])];
+    const toLoad = targets.filter(s => !searchImgCacheRef.current[s]);
+    if (!toLoad.length) return;
+    (async () => {
+      const results = await Promise.allSettled(
+        toLoad.map(async s => {
+          const res = await fetch(`/api/search?q=${encodeURIComponent(s)}&display=3`);
+          const data = await res.json();
+          const img = (data.items ?? []).find((i: { image?: string }) => i.image)?.image ?? "";
+          return { s, img };
+        })
+      );
+      const updates: Record<string, string> = {};
+      results.forEach(r => { if (r.status === "fulfilled" && r.value.img) updates[r.value.s] = r.value.img; });
+      Object.assign(searchImgCacheRef.current, updates);
+      setSearchImgs({ ...searchImgCacheRef.current });
+    })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showDropdown]);
 
   // 드롭다운 외부 클릭 닫기
   useEffect(() => {
@@ -404,76 +429,72 @@ export default function Home() {
           ref={dropdownRef}
           className="fixed left-0 right-0 z-10 px-4 pt-2"
           style={{ top: "72px" }}>
-          <div className="bg-white rounded-3xl shadow-xl overflow-hidden max-w-screen-xl mx-auto">
-            {/* 최근 검색어 */}
-            {recentSearches.length > 0 && (
-              <div className="px-4 pt-4 pb-2">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase">최근 검색</p>
-                  <button
-                    onClick={() => { setRecentSearches([]); saveRecent([]); }}
-                    className="text-[10px] text-gray-400 hover:text-gray-600">
-                    전체 삭제
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {recentSearches.map(r => (
-                    <div key={r}
-                      onClick={() => submitSearch(r)}
-                      className="flex items-center gap-1 bg-[#F7F0E6] rounded-full px-3 py-1.5 cursor-pointer hover:bg-[#ede6da] transition-colors">
-                      <svg width="11" height="11" fill="none" stroke="#999" strokeWidth="2" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>
-                      </svg>
-                      <span className="text-xs text-[#1A1A1A]">{r}</span>
-                      <button
-                        onClick={(e) => removeRecent(r, e)}
-                        className="text-gray-300 hover:text-gray-500 ml-0.5">
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                          <path d="M18 6L6 18M6 6l12 12"/>
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+          <div className="bg-white rounded-3xl shadow-xl max-w-screen-xl mx-auto overflow-hidden max-h-[70vh] overflow-y-auto">
 
-            {/* 구분선 */}
-            {recentSearches.length > 0 && (
-              <div className="mx-4 my-2 border-t border-gray-100" />
+            {/* 최근 검색 */}
+            {recentSearches.length > 0 && !query.trim() && (
+              <>
+                <div className="flex items-center justify-between px-4 pt-4 pb-1">
+                  <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase">최근 검색</p>
+                  <button onClick={() => { setRecentSearches([]); saveRecent([]); }}
+                    className="text-[10px] text-gray-400 hover:text-gray-600">전체 삭제</button>
+                </div>
+                {recentSearches.map(r => (
+                  <button key={r} onClick={() => submitSearch(r)}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#F7F0E6] transition-colors text-left">
+                    <div className="w-11 h-11 rounded-2xl overflow-hidden shrink-0 bg-[#EDE6DA]">
+                      {searchImgs[r]
+                        ? <img src={searchImgs[r]} alt="" className="w-full h-full object-cover" />
+                        : <div className="w-full h-full animate-pulse bg-[#EDE6DA]" />}
+                    </div>
+                    <span className="flex-1 text-sm font-medium text-[#1A1A1A]">{r}</span>
+                    <button onClick={(e) => removeRecent(r, e)}
+                      className="p-1 text-gray-300 hover:text-gray-500 shrink-0">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                      </svg>
+                    </button>
+                  </button>
+                ))}
+                <div className="mx-4 border-t border-gray-100 my-1" />
+              </>
             )}
 
             {/* 추천/검색 제안 */}
-            <div className="px-4 pb-4 pt-2">
-              <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase mb-2">
+            <div className="flex items-center px-4 pt-3 pb-1">
+              <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase">
                 {query.trim() ? "검색 제안" : "추천 검색어"}
               </p>
-              {filteredSuggestions.length > 0 ? (
-                <div className="space-y-0">
-                  {filteredSuggestions.map(s => (
-                    <button
-                      key={s}
-                      onClick={() => submitSearch(s)}
-                      className="w-full flex items-center gap-3 py-2.5 px-1 text-left hover:bg-[#F7F0E6] rounded-xl transition-colors">
-                      <svg width="14" height="14" fill="none" stroke="#CCC" strokeWidth="2" viewBox="0 0 24 24">
-                        <circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/>
-                      </svg>
-                      <span className="text-sm text-[#1A1A1A]">
-                        {query.trim()
-                          ? s.split(query).flatMap((part, i) =>
-                              i === 0 ? [part] : [<strong key={i} className="text-[#FF3D7F]">{query}</strong>, part]
-                            )
-                          : s}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-gray-400 py-2">
-                  &ldquo;{query}&rdquo; — Enter 키로 검색
-                </p>
-              )}
             </div>
+            {filteredSuggestions.length > 0 ? (
+              <>
+                {filteredSuggestions.map(s => (
+                  <button key={s} onClick={() => submitSearch(s)}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#F7F0E6] transition-colors text-left">
+                    <div className="w-11 h-11 rounded-2xl overflow-hidden shrink-0 bg-[#EDE6DA]">
+                      {searchImgs[s]
+                        ? <img src={searchImgs[s]} alt="" className="w-full h-full object-cover" />
+                        : <div className="w-full h-full animate-pulse bg-[#EDE6DA]" />}
+                    </div>
+                    <span className="flex-1 text-sm font-medium text-[#1A1A1A]">
+                      {query.trim()
+                        ? s.split(query).flatMap((part, i) =>
+                            i === 0 ? [part] : [<strong key={i} className="text-[#FF3D7F]">{query}</strong>, part]
+                          )
+                        : s}
+                    </span>
+                    <svg width="14" height="14" fill="none" stroke="#CCC" strokeWidth="2" viewBox="0 0 24 24">
+                      <path d="M7 17L17 7M7 7h10v10"/>
+                    </svg>
+                  </button>
+                ))}
+              </>
+            ) : (
+              <p className="text-xs text-gray-400 px-4 pb-3 pt-1">
+                &ldquo;{query}&rdquo; — Enter 키로 검색
+              </p>
+            )}
+            <div className="h-3" />
           </div>
         </div>
       )}
