@@ -48,13 +48,12 @@ const STYLES = [
 function BrandCard({ id, label, on, onClick }: {
   id: string; label: string; on: boolean; onClick: () => void;
 }) {
-  const fontSize = label.length <= 4 ? "text-sm" : label.length <= 9 ? "text-xs" : "text-[9px]";
   return (
     <button onClick={onClick}
       className={`relative flex items-center justify-center rounded-2xl aspect-square transition-all p-2 ${
         on ? "bg-[#FFF0EA] ring-[2.5px] ring-[#FF5C1A] shadow-md z-10" : "bg-white shadow-sm hover:shadow-md"
       }`}>
-      <p className={`${fontSize} font-black text-center leading-tight ${on ? "text-[#FF5C1A]" : "text-[#1A1A1A]"}`}>
+      <p className={`text-[11px] font-black text-center leading-tight ${on ? "text-[#FF5C1A]" : "text-[#1A1A1A]"}`}>
         {label}
       </p>
       {on && (
