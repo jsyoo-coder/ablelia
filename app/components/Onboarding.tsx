@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
 
 interface OnboardingProps {
   onLogin: () => Promise<void>;
@@ -10,32 +9,31 @@ interface OnboardingProps {
 }
 
 const SLIDES = [
-  { title: "국내 모든 패션\n한눈에 비교", desc: "무신사·에이블리·지그재그\n가격을 앱 하나로 비교하세요" },
-  { title: "지금 인기 있는\n아이템 먼저", desc: "가장 많이 찜 받은 상품을\n실시간으로 발견하세요" },
-  { title: "로그인하고\n내 스타일 저장", desc: "취향에 맞는 상품 추천과\n찜 목록을 언제나 확인하세요" },
+  { title: "국내 모든 패션\n한눈에 비교", desc: "무신사·에이블리·지그재그\n가격을 앱 하나로 비교하세요", statusBg: "#b2b1b2" },
+  { title: "지금 인기 있는\n아이템 먼저", desc: "가장 많이 찜 받은 상품을\n실시간으로 발견하세요", statusBg: "#eae5e7" },
+  { title: "로그인하고\n내 스타일 저장", desc: "취향에 맞는 상품 추천과\n찜 목록을 언제나 확인하세요", statusBg: "#cfccc7" },
 ];
 
 const R = 80;
 
 export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingProps) {
   const [step, setStep] = useState(0);
-  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
-  const [isDesktop, setIsDesktop] = useState(false);
   const touchStartX = useRef(0);
 
+  // status-bar 배경을 이미지 상단 색상으로 맞춤
   useEffect(() => {
-    const desktop = window.innerWidth >= 500;
-    setIsDesktop(desktop);
-    // 데스크탑: #phone-inner에 absolute → status bar까지 이미지 덮음
-    // 모바일: body에 fixed → 뷰포트 전체 덮음
-    setPortalTarget(
-      desktop
-        ? (document.getElementById("phone-inner") ?? document.body)
-        : document.body
-    );
+    const bar = document.getElementById("status-bar");
+    if (!bar) return;
+    const prevBg = bar.style.background;
+    return () => { bar.style.background = prevBg; };
   }, []);
 
-  // 온보딩 표시 중 배경 스크롤 전면 차단
+  useEffect(() => {
+    const bar = document.getElementById("status-bar");
+    if (bar) bar.style.background = SLIDES[step].statusBg;
+  }, [step]);
+
+  // 배경 스크롤 차단
   useEffect(() => {
     const targets = [
       document.getElementById("phone-screen"),
@@ -59,17 +57,14 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
     else if (dx < -50 && step > 0) setStep(s => s - 1);
   }
 
-  if (!portalTarget) return null;
-
-  return createPortal(
+  return (
     <div
-      className={`${isDesktop ? "absolute" : "fixed"} inset-0 z-50 flex flex-col`}
-      style={{ background: "#000" }}
+      className="fixed inset-0 z-50 flex flex-col"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onTouchMove={e => e.stopPropagation()}
     >
-      {/* 상단 이미지 영역 */}
+      {/* 이미지 영역 */}
       <div className="flex-1 relative overflow-hidden min-h-0">
         <img
           key={step}
@@ -88,7 +83,6 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
           paddingBottom: "max(env(safe-area-inset-bottom, 0px), 12px)",
         }}
       >
-        {/* 우측 상단 오목 SVG */}
         <svg
           className="absolute right-0 pointer-events-none"
           style={{ top: -R, height: R, width: R }}
@@ -98,7 +92,6 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
           <path d={`M0 ${R} A${R} ${R} 0 0 0 ${R} 0 L${R} ${R} Z`} />
         </svg>
 
-        {/* 닷 인디케이터 */}
         <div className="flex justify-center gap-2 mb-5">
           {SLIDES.map((_, i) => (
             <button
@@ -121,7 +114,6 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
           {desc}
         </p>
 
-        {/* 버튼 영역 — minHeight 고정으로 슬라이드 전환 시 카드 높이 불변 */}
         <div className="mt-5" style={{ minHeight: 110 }}>
           {isLast ? (
             <>
@@ -151,7 +143,6 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
           )}
         </div>
       </div>
-    </div>,
-    portalTarget
+    </div>
   );
 }
