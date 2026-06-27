@@ -11,8 +11,8 @@ type UserProfile = {
   email: string;
   preferences: string[];
   brands: string[];
-  gender: string;
-  ageGroup: string;
+  genders: string[];
+  ageGroups: string[];
   onboardingComplete: boolean;
 };
 
@@ -22,7 +22,7 @@ type AuthContextType = {
   loading: boolean;
   signInWithGoogle: () => Promise<string | null>;
   logout: () => Promise<void>;
-  updatePreferences: (preferences: string[], brands?: string[], gender?: string, ageGroup?: string) => Promise<void>;
+  updatePreferences: (preferences: string[], brands?: string[], genders?: string[], ageGroups?: string[]) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -70,8 +70,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             email: u.email ?? "",
             preferences: [],
             brands: [],
-            gender: "",
-            ageGroup: "",
+            genders: [],
+            ageGroups: [],
             onboardingComplete: false,
           };
 
@@ -80,13 +80,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const snap = await getDoc(ref);
 
             if (snap.exists()) {
-              const stored = snap.data() as UserProfile;
-              // Auth 값이 있을 때만 Firestore 값을 덮어씀
+              const stored = snap.data();
+              // 구버전(string) → 신버전(array) 마이그레이션
+              const genders = Array.isArray(stored.genders) ? (stored.genders as string[])
+                : stored.gender ? [stored.gender as string] : [];
+              const ageGroups = Array.isArray(stored.ageGroups) ? (stored.ageGroups as string[])
+                : stored.ageGroup ? [stored.ageGroup as string] : [];
+
               const merged: UserProfile = {
-                ...stored,
-                ...(freshPhoto ? { photoURL: freshPhoto } : {}),
-                ...(freshName ? { displayName: freshName } : {}),
-                email: u.email ?? stored.email,
+                uid: u.uid,
+                displayName: freshName || (stored.displayName as string) || "",
+                photoURL: freshPhoto || (stored.photoURL as string) || "",
+                email: u.email ?? (stored.email as string) ?? "",
+                preferences: (stored.preferences as string[]) ?? [],
+                brands: (stored.brands as string[]) ?? [],
+                genders,
+                ageGroups,
+                onboardingComplete: (stored.onboardingComplete as boolean) ?? false,
               };
               // photoURL이 달라졌으면 Firestore도 업데이트
               if (freshPhoto && stored.photoURL !== freshPhoto) {
@@ -139,13 +149,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await signOut(auth);
   }
 
-  async function updatePreferences(preferences: string[], brands: string[] = [], gender: string = "", ageGroup: string = "") {
+  async function updatePreferences(preferences: string[], brands: string[] = [], genders: string[] = [], ageGroups: string[] = []) {
     if (!user) return;
-    setProfile((prev) => (prev ? { ...prev, preferences, brands, gender, ageGroup, onboardingComplete: true } : prev));
+    setProfile((prev) => (prev ? { ...prev, preferences, brands, genders, ageGroups, onboardingComplete: true } : prev));
     const { getFirestore, doc, setDoc } = await import("firebase/firestore");
     const db = getFirestore(app);
     const ref = doc(db, "users", user.uid);
-    await setDoc(ref, { preferences, brands, gender, ageGroup, onboardingComplete: true }, { merge: true });
+    await setDoc(ref, { preferences, brands, genders, ageGroups, onboardingComplete: true }, { merge: true });
   }
 
   return (

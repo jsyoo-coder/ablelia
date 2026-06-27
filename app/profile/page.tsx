@@ -39,8 +39,8 @@ export default function ProfilePage() {
   const { user, profile, loading, logout, updatePreferences } = useAuth();
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
-  const [gender, setGender] = useState("");
-  const [ageGroup, setAgeGroup] = useState("");
+  const [genders, setGenders] = useState<string[]>([]);
+  const [ageGroups, setAgeGroups] = useState<string[]>([]);
   const [showPopup, setShowPopup] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [styleImgs, setStyleImgs] = useState<Record<string, string>>({});
@@ -49,8 +49,8 @@ export default function ProfilePage() {
     if (loading) return;
     if (!user || !profile) { router.push("/"); return; }
     setSelected(profile.preferences ?? []);
-    setGender(profile.gender ?? "");
-    setAgeGroup(profile.ageGroup ?? "");
+    setGenders(profile.genders ?? []);
+    setAgeGroups(profile.ageGroups ?? []);
   }, [loading, user, profile]);
 
   useEffect(() => {
@@ -84,7 +84,7 @@ export default function ProfilePage() {
   async function handleSave() {
     setSaveError("");
     try {
-      await updatePreferences(selected, [], gender, ageGroup);
+      await updatePreferences(selected, [], genders, ageGroups);
       setShowPopup(true);
       setTimeout(() => { setShowPopup(false); router.push("/"); }, 1500);
     } catch (e: unknown) {
@@ -152,7 +152,8 @@ export default function ProfilePage() {
         <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase mb-2">GENDER</p>
         <div className="flex gap-2 mb-6">
           {GENDERS.map(g => (
-            <PillButton key={g} label={g} on={gender === g} onClick={() => setGender(prev => prev === g ? "" : g)} />
+            <PillButton key={g} label={g} on={genders.includes(g)}
+              onClick={() => setGenders(prev => prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g])} />
           ))}
         </div>
 
@@ -160,7 +161,8 @@ export default function ProfilePage() {
         <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase mb-2">AGE</p>
         <div className="flex flex-wrap gap-2 mb-6">
           {AGE_GROUPS.map(a => (
-            <PillButton key={a} label={a} on={ageGroup === a} onClick={() => setAgeGroup(prev => prev === a ? "" : a)} />
+            <PillButton key={a} label={a} on={ageGroups.includes(a)}
+              onClick={() => setAgeGroups(prev => prev.includes(a) ? prev.filter(x => x !== a) : [...prev, a])} />
           ))}
         </div>
 

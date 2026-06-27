@@ -113,15 +113,19 @@ export default function Home() {
   // 초기 피드 + 관심사/브랜드 변경 시 재요청
   const prefsKey = [
     ...(profile?.preferences ?? []),
-    profile?.gender ?? "",
-    profile?.ageGroup ?? "",
+    ...(profile?.genders ?? []),
+    ...(profile?.ageGroups ?? []),
   ].join(",");
 
   function buildQuery(base: string): string {
-    const g = profile?.gender === "여성" ? "여성의류"
-            : profile?.gender === "남성" ? "남성의류"
-            : "";
-    const a = (profile?.ageGroup ?? "").replace(" 이상", "");
+    const userGenders = profile?.genders ?? [];
+    const userAgeGroups = profile?.ageGroups ?? [];
+    const g = userGenders.length === 1
+      ? (userGenders[0] === "여성" ? "여성의류" : "남성의류")
+      : "";
+    const a = userAgeGroups.length === 1
+      ? userAgeGroups[0].replace(" 이상", "")
+      : "";
     return [a, g, base].filter(Boolean).join(" ");
   }
 
@@ -132,7 +136,28 @@ export default function Home() {
       ? stylePool[Math.floor(Math.random() * stylePool.length)]
       : TRENDING[Math.floor(Math.random() * TRENDING.length)];
     setActiveStyle(null);
-    fetchItems(buildQuery(base), 1, false);
+
+    const q = buildQuery(base);
+    async function loadWithFallback() {
+      setFetching(true);
+      setItems([]);
+      currentQueryRef.current = q;
+      startRef.current = 41;
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&start=1`);
+      const data = await res.json();
+      const result: Product[] = data.items ?? [];
+      if (result.length === 0 && q !== base) {
+        // 성별/나이 조합이 결과 없으면 스타일 단독 쿼리로 재시도
+        const res2 = await fetch(`/api/search?q=${encodeURIComponent(base)}&start=1`);
+        const data2 = await res2.json();
+        currentQueryRef.current = base;
+        setItems(data2.items ?? []);
+      } else {
+        setItems(result);
+      }
+      setFetching(false);
+    }
+    loadWithFallback();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, loading, prefsKey]);
 
@@ -345,12 +370,22 @@ export default function Home() {
           </div>
         )}
 
-        {/* 스타일 칩 */}
-        {tab === "feed" && userPrefs.length > 0 && (
+        {/* 스타일·성별·나이 칩 */}
+        {tab === "feed" && (userPrefs.length > 0 || (profile?.genders ?? []).length > 0 || (profile?.ageGroups ?? []).length > 0) && (
           <div className="flex gap-2 overflow-x-auto scrollbar-hide max-w-screen-xl mx-auto">
+            {(profile?.genders ?? []).map(g => (
+              <span key={`g-${g}`} className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-full bg-[#FF3D7F] text-white">
+                {g}
+              </span>
+            ))}
+            {(profile?.ageGroups ?? []).map(a => (
+              <span key={`a-${a}`} className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-full bg-[#FF3D7F] text-white">
+                {a}
+              </span>
+            ))}
             {userPrefs.map(p => (
               <button key={p}
-                onClick={() => { setActiveStyle(p); fetchItems(STYLE_QUERIES[p], 1, false); }}
+                onClick={() => { setActiveStyle(p); fetchItems(buildQuery(STYLE_QUERIES[p]), 1, false); }}
                 className={`shrink-0 text-xs font-semibold px-4 py-1.5 rounded-full transition-all ${
                   activeStyle === p
                     ? "bg-[#FF3D7F] text-white shadow-sm"
