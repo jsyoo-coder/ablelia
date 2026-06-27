@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import ProductCard from "./components/ProductCard";
@@ -66,6 +66,7 @@ export default function Home() {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [signingIn, setSigningIn] = useState(false);
   const [searchSubmitted, setSearchSubmitted] = useState(false);
+  const [masoncols, setMasoncols] = useState(2);
   const currentQueryRef = useRef("");
   const startRef = useRef(1);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -76,6 +77,17 @@ export default function Home() {
   // localStorage 최근 검색어 로드
   useEffect(() => {
     setRecentSearches(loadRecent());
+  }, []);
+
+  // 화면 너비에 따른 컬럼 수 (2/3/4)
+  useLayoutEffect(() => {
+    function update() {
+      const w = window.innerWidth;
+      setMasoncols(w >= 1024 ? 4 : w >= 640 ? 3 : 2);
+    }
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
   }, []);
 
   const fetchItems = useCallback(async (q: string, start = 1, append = false) => {
@@ -273,7 +285,8 @@ export default function Home() {
                   onChange={e => { setQuery(e.target.value); if (searchSubmitted) setSearchSubmitted(false); }}
                   onKeyDown={e => e.key === "Enter" && submitSearch(query)}
                   placeholder="패션 아이템 검색..."
-                  className="flex-1 text-sm outline-none bg-transparent"
+                  className="flex-1 outline-none bg-transparent"
+                  style={{ fontSize: "16px" }}
                 />
                 {query && (
                   <button onClick={() => { setQuery(""); setSearchSubmitted(false); setItems([]); inputRef.current?.focus(); }}
@@ -432,10 +445,10 @@ export default function Home() {
           )}
           {fetching ? (
             <div className="flex gap-3">
-              {[0, 1].map(col => (
+              {Array.from({ length: masoncols }, (_, col) => col).map(col => (
                 <div key={col} className="flex-1 flex flex-col min-w-0">
                   {Array.from({ length: 6 }).map((_, i) => {
-                    const idx = col + i * 2;
+                    const idx = col + i * masoncols;
                     return (
                       <div key={idx} className="mb-3 rounded-3xl bg-white animate-pulse shadow-sm overflow-hidden">
                         <div className="rounded-3xl m-2" style={{ height: `${160 + (idx % 4) * 50}px`, background: "#EDE6DA" }} />
@@ -452,9 +465,9 @@ export default function Home() {
             </div>
           ) : (
             <div className="flex gap-3">
-              {[0, 1].map(col => (
+              {Array.from({ length: masoncols }, (_, col) => col).map(col => (
                 <div key={col} className="flex-1 flex flex-col min-w-0">
-                  {items.map((item, i) => ({ item, i })).filter(({ i }) => i % 2 === col).map(({ item, i }) => (
+                  {items.map((item, i) => ({ item, i })).filter(({ i }) => i % masoncols === col).map(({ item, i }) => (
                     <ProductCard key={`${item.link}-${i}`} product={item} isNew={i < 6} />
                   ))}
                 </div>
@@ -475,7 +488,7 @@ export default function Home() {
                 <button onClick={() => { setRecentSearches([]); saveRecent([]); }}
                   className="text-xs text-gray-400 hover:text-gray-600">전체 삭제</button>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                 {recentSearches.map(r => (
                   <button key={r} onClick={() => submitSearch(r)}
                     className="flex items-center gap-3 bg-white rounded-2xl p-2.5 shadow-sm hover:shadow-md transition-shadow text-left">
@@ -501,7 +514,7 @@ export default function Home() {
               {query.trim() ? "검색 제안" : "추천 아이디어"}
             </h2>
             {filteredSuggestions.length > 0 ? (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                 {filteredSuggestions.map(s => (
                   <button key={s} onClick={() => submitSearch(s)}
                     className="flex items-center gap-3 bg-white rounded-2xl p-2.5 shadow-sm hover:shadow-md transition-shadow text-left">
@@ -537,10 +550,10 @@ export default function Home() {
           )}
           {fetching ? (
             <div className="flex gap-3">
-              {[0, 1].map(col => (
+              {Array.from({ length: masoncols }, (_, col) => col).map(col => (
                 <div key={col} className="flex-1 flex flex-col min-w-0">
                   {Array.from({ length: 6 }).map((_, i) => {
-                    const idx = col + i * 2;
+                    const idx = col + i * masoncols;
                     return (
                       <div key={idx} className="mb-3 rounded-3xl bg-white animate-pulse shadow-sm overflow-hidden">
                         <div className="rounded-3xl m-2" style={{ height: `${160 + (idx % 4) * 50}px`, background: "#EDE6DA" }} />
@@ -557,9 +570,9 @@ export default function Home() {
             </div>
           ) : (
             <div className="flex gap-3">
-              {[0, 1].map(col => (
+              {Array.from({ length: masoncols }, (_, col) => col).map(col => (
                 <div key={col} className="flex-1 flex flex-col min-w-0">
-                  {items.map((item, i) => ({ item, i })).filter(({ i }) => i % 2 === col).map(({ item, i }) => (
+                  {items.map((item, i) => ({ item, i })).filter(({ i }) => i % masoncols === col).map(({ item, i }) => (
                     <ProductCard key={`${item.link}-${i}`} product={item} isNew={i < 6} />
                   ))}
                 </div>
