@@ -26,9 +26,7 @@ export default function OnboardingPage() {
   const [saving, setSaving] = useState(false);
 
   function toggle(id: string) {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
-    );
+    setSelected(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
   }
 
   async function handleDone() {
@@ -39,27 +37,44 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold mb-1">안녕하세요, {profile?.displayName?.split(" ")[0]}님</h1>
-          <p className="text-gray-400 text-sm">좋아하는 스타일을 3개 이상 골라주세요</p>
+    <div className="min-h-screen flex flex-col px-5 py-10" style={{ background: "#F7F0E6" }}>
+      <div className="w-full max-w-md mx-auto flex-1 flex flex-col">
+        {/* Logo */}
+        <h1 className="text-2xl font-black text-[#1A1A1A] mb-8" style={{ letterSpacing: "-0.03em" }}>
+          ablelia
+        </h1>
+
+        {/* Title */}
+        <div className="mb-6">
+          <h2 className="text-xl font-black text-[#1A1A1A] leading-snug">
+            안녕하세요,<br />
+            <span className="text-[#FF5C1A]">{profile?.displayName?.split(" ")[0]}님</span>
+          </h2>
+          <p className="text-sm text-gray-500 mt-2">좋아하는 스타일을 <strong>3개 이상</strong> 골라주세요</p>
         </div>
 
-        <div className="grid grid-cols-3 gap-3 mb-8">
+        <p className="text-[10px] font-black tracking-widest text-[#FF5C1A] uppercase mb-3">
+          CATEGORIES
+        </p>
+
+        <div className="grid grid-cols-3 gap-2.5 mb-8 flex-1">
           {STYLES.map((s) => {
             const on = selected.includes(s.id);
             return (
               <button
                 key={s.id}
                 onClick={() => toggle(s.id)}
-                className={`flex flex-col items-center gap-1 p-4 rounded-2xl border-2 transition-all ${
-                  on ? "border-black bg-black text-white" : "border-gray-100 hover:border-gray-300"
+                className={`flex flex-col items-center gap-1 py-4 px-2 rounded-3xl transition-all ${
+                  on
+                    ? "bg-[#FF5C1A] text-white shadow-md scale-105"
+                    : "bg-white text-[#1A1A1A] shadow-sm hover:shadow-md"
                 }`}
               >
                 <span className="text-2xl">{s.emoji}</span>
-                <span className="text-sm font-semibold">{s.label}</span>
-                <span className={`text-xs ${on ? "text-gray-300" : "text-gray-400"}`}>{s.desc}</span>
+                <span className="text-xs font-bold">{s.label}</span>
+                <span className={`text-[10px] text-center leading-tight ${on ? "text-orange-100" : "text-gray-400"}`}>
+                  {s.desc}
+                </span>
               </button>
             );
           })}
@@ -68,13 +83,13 @@ export default function OnboardingPage() {
         <button
           onClick={handleDone}
           disabled={selected.length < 3 || saving}
-          className={`w-full py-4 rounded-2xl text-sm font-semibold transition-all ${
+          className={`w-full py-4 rounded-2xl text-sm font-bold transition-all ${
             selected.length >= 3
-              ? "bg-black text-white hover:bg-gray-800"
-              : "bg-gray-100 text-gray-400 cursor-not-allowed"
+              ? "bg-[#FF5C1A] text-white hover:bg-[#e04e10] shadow-md"
+              : "bg-white text-gray-300 cursor-not-allowed"
           }`}
         >
-          {saving ? "저장 중..." : `시작하기 ${selected.length > 0 ? `(${selected.length}/3+)` : ""}`}
+          {saving ? "저장 중..." : `시작하기 ${selected.length > 0 ? `(${selected.length}개 선택)` : ""}`}
         </button>
       </div>
     </div>
