@@ -76,7 +76,6 @@ export default function OnboardingPage() {
   }, []);
 
   async function handleDone() {
-    if (styles.length < 3) return;
     setSaving(true);
     try { await updatePreferences(styles, []); } catch (e) { console.error(e); }
     router.push("/");
@@ -112,13 +111,9 @@ export default function OnboardingPage() {
           ))}
         </div>
 
-        <button onClick={handleDone} disabled={styles.length < 3 || saving}
-          className={`w-full py-4 rounded-2xl text-sm font-bold transition-all ${
-            styles.length >= 3
-              ? "bg-[#FF3D7F] text-white hover:bg-[#d42d6e] shadow-md"
-              : "bg-white text-gray-300 cursor-not-allowed"
-          }`}>
-          {saving ? "저장 중..." : `시작하기 ${styles.length > 0 ? `(${styles.length}개)` : ""}`}
+        <button onClick={handleDone} disabled={saving}
+          className="w-full py-4 rounded-2xl text-sm font-bold transition-all bg-[#FF3D7F] text-white hover:bg-[#d42d6e] shadow-md">
+          {saving ? "저장 중..." : styles.length > 0 ? `시작하기 (${styles.length}개 선택)` : "건너뛰기"}
         </button>
 
       </div>

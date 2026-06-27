@@ -127,10 +127,6 @@ export default function Home() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, loading, prefsKey]);
 
-  // 온보딩
-  useEffect(() => {
-    if (!loading && user && profile && !profile.onboardingComplete) router.push("/onboarding");
-  }, [loading, user, profile]);
 
   // 드롭다운 외부 클릭 닫기
   useEffect(() => {
