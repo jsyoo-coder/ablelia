@@ -48,6 +48,11 @@ button, [role="button"], a, label[for] { cursor: pointer; }
   to   { transform: translateY(0); }
 }
 
+@keyframes onboardingFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 /* ── 폰 프레임 (데스크탑) ── */
 #phone-power { display: none; }
 #status-bar  { display: none; }
