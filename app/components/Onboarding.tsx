@@ -107,7 +107,10 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
       {/* 하단 흰색 카드 */}
       <div
         className="relative bg-white px-6 pt-2 shrink-0"
-        style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 28px)" }}
+        style={{
+          borderRadius: "44px 0 0 44px",
+          paddingBottom: "max(env(safe-area-inset-bottom, 0px), 28px)",
+        }}
       >
         {/*
           SVG를 카드 위(top: -R)에 겹쳐서 그림 → 카드 내부는 pt-5만 사용, 여백 최소화
