@@ -10,32 +10,29 @@ type Product = {
 
 export default function ProductCard({ product }: { product: Product }) {
   const title = product.title.replace(/<[^>]+>/g, "");
-  const price = product.lprice ? Number(product.lprice).toLocaleString() : "-";
+  const price = product.lprice ? Number(product.lprice).toLocaleString() : null;
 
   return (
     <a
       href={product.link}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex flex-col rounded-2xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
+      className="group block break-inside-avoid mb-2.5"
     >
-      <div className="aspect-square bg-gray-50 overflow-hidden">
-        {product.image ? (
+      <div className="rounded-xl overflow-hidden bg-gray-50">
+        {product.image && (
           <img
             src={product.image}
             alt={title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-auto block group-hover:opacity-90 transition-opacity"
           />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-300 text-sm">
-            이미지 없음
-          </div>
         )}
       </div>
-      <div className="p-3 flex flex-col gap-1">
-        <p className="text-xs text-gray-400">{product.mallName}</p>
-        <p className="text-sm font-medium leading-snug line-clamp-2">{title}</p>
-        <p className="text-base font-bold mt-1">{price}원</p>
+      <div className="pt-1.5 pb-1 px-0.5">
+        {product.brand && (
+          <p className="text-[11px] text-gray-400 truncate">{product.brand}</p>
+        )}
+        {price && <p className="text-sm font-semibold">{price}원</p>}
       </div>
     </a>
   );
