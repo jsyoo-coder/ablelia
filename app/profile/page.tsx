@@ -19,57 +19,10 @@ const STYLES = [
   { id: "preppy",   label: "프레피",   q: "프레피 컬리지룩" },
 ];
 
-const BRANDS = [
-  { id: "nike",            label: "Nike",           logo: "https://logo.clearbit.com/nike.com",            q: "나이키 Nike" },
-  { id: "adidas",          label: "Adidas",         logo: "https://logo.clearbit.com/adidas.com",          q: "아디다스 Adidas" },
-  { id: "newbalance",      label: "New Balance",    logo: "https://logo.clearbit.com/newbalance.com",      q: "뉴발란스 New Balance" },
-  { id: "northface",       label: "North Face",     logo: "https://logo.clearbit.com/thenorthface.com",    q: "노스페이스 The North Face" },
-  { id: "uniqlo",          label: "Uniqlo",         logo: "https://logo.clearbit.com/uniqlo.com",          q: "유니클로 Uniqlo" },
-  { id: "zara",            label: "Zara",           logo: "https://logo.clearbit.com/zara.com",            q: "Zara 자라 패션" },
-  { id: "stussy",          label: "Stüssy",         logo: "https://logo.clearbit.com/stussy.com",          q: "Stussy 스투시" },
-  { id: "levis",           label: "Levi's",         logo: "https://logo.clearbit.com/levi.com",            q: "Levis 리바이스" },
-  { id: "polo",            label: "Polo RL",        logo: "https://logo.clearbit.com/ralphlauren.com",     q: "Polo Ralph Lauren" },
-  { id: "patagonia",       label: "Patagonia",      logo: "https://logo.clearbit.com/patagonia.com",       q: "Patagonia 파타고니아" },
-  { id: "arcteryx",        label: "Arc'teryx",      logo: "https://logo.clearbit.com/arcteryx.com",        q: "Arcteryx 아크테릭스" },
-  { id: "champion",        label: "Champion",       logo: "https://logo.clearbit.com/champion.com",        q: "Champion 챔피온" },
-  { id: "musinsa",         label: "무신사 스탠다드", logo: "https://logo.clearbit.com/musinsa.com",         q: "무신사 스탠다드" },
-  { id: "covernat",        label: "Covernat",       logo: "https://logo.clearbit.com/covernat.com",        q: "Covernat 커버낫" },
-  { id: "adererror",       label: "Ader Error",     logo: "https://logo.clearbit.com/adererror.com",       q: "Ader Error 아더에러" },
-  { id: "thisisneverthat", label: "thisisneverthat", logo: "https://logo.clearbit.com/thisisneverthat.com", q: "thisisneverthat 디스이즈네버댓" },
-  { id: "mahagrid",        label: "Mahagrid",       logo: "https://logo.clearbit.com/mahagrid.com",        q: "Mahagrid 마하그리드" },
-  { id: "anderbell",       label: "Andersson Bell", logo: "https://logo.clearbit.com/anderssonbell.com",   q: "Andersson Bell 앤더슨벨" },
-  { id: "spao",            label: "SPAO",           logo: "https://logo.clearbit.com/spao.com",            q: "SPAO 스파오" },
-  { id: "8seconds",        label: "8seconds",       logo: "https://logo.clearbit.com/8seconds.co.kr",      q: "8seconds 에잇세컨즈" },
-  { id: "other",           label: "기타",            logo: "",                                               q: "" },
-];
-
-function BrandCard({ id, label, on, onClick }: {
-  id: string; label: string; on: boolean; onClick: () => void;
-}) {
-  return (
-    <button onClick={onClick}
-      className={`relative flex items-center justify-center rounded-2xl aspect-square transition-all p-2 ${
-        on ? "bg-[#FFF0EA] ring-[2.5px] ring-[#FF5C1A] shadow-md z-10" : "bg-white shadow-sm hover:shadow-md"
-      }`}>
-      <p className={`text-[11px] font-black text-center leading-tight ${on ? "text-[#FF5C1A]" : "text-[#1A1A1A]"}`}>
-        {label}
-      </p>
-      {on && (
-        <div className="absolute top-1 right-1 w-4 h-4 bg-[#FF5C1A] rounded-full flex items-center justify-center">
-          <svg width="8" height="8" fill="none" stroke="white" strokeWidth="3" viewBox="0 0 24 24">
-            <path d="M20 6L9 17l-5-5"/>
-          </svg>
-        </div>
-      )}
-    </button>
-  );
-}
-
 export default function ProfilePage() {
   const { user, profile, loading, logout, updatePreferences } = useAuth();
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [styleImgs, setStyleImgs] = useState<Record<string, string>>({});
@@ -78,7 +31,6 @@ export default function ProfilePage() {
     if (loading) return;
     if (!user || !profile) { router.push("/"); return; }
     setSelected(profile.preferences ?? []);
-    setSelectedBrands(profile.brands ?? []);
   }, [loading, user, profile]);
 
   useEffect(() => {
@@ -109,16 +61,12 @@ export default function ProfilePage() {
     setSelected(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
     setSaved(false);
   }
-  function toggleBrand(id: string) {
-    setSelectedBrands(prev => prev.includes(id) ? prev.filter(b => b !== id) : [...prev, id]);
-    setSaved(false);
-  }
 
   async function handleSave() {
     if (selected.length < 3) return;
     setSaving(true);
     try {
-      await updatePreferences(selected, selectedBrands);
+      await updatePreferences(selected, []);
       setSaved(true);
       setTimeout(() => router.push("/"), 800);
     } catch (e) {
@@ -135,7 +83,6 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen pb-10" style={{ background: "#F7F0E6" }}>
-      {/* Header */}
       <header className="px-5 pt-5 pb-4 flex items-center justify-between">
         <button onClick={() => router.push("/")}
           className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-sm">
@@ -151,7 +98,6 @@ export default function ProfilePage() {
       </header>
 
       <div className="max-w-md mx-auto px-5">
-        {/* 유저 카드 */}
         <div className="bg-white rounded-3xl p-4 flex items-center gap-3 mb-6 shadow-sm">
           {profile.photoURL ? (
             <img src={profile.photoURL} alt="" className="w-14 h-14 rounded-full shrink-0" referrerPolicy="no-referrer" />
@@ -163,21 +109,10 @@ export default function ProfilePage() {
           <div className="min-w-0">
             <p className="font-bold text-[#1A1A1A] truncate">{profile.displayName}</p>
             <p className="text-xs text-gray-400 mt-0.5 truncate">{profile.email}</p>
-            <p className="text-xs text-[#FF5C1A] font-semibold mt-1">스타일 {selected.length}개 · 브랜드 {selectedBrands.length}개</p>
+            <p className="text-xs text-[#FF5C1A] font-semibold mt-1">스타일 {selected.length}개 선택</p>
           </div>
         </div>
 
-        {/* 브랜드 */}
-        <p className="text-[10px] font-black tracking-widest text-[#FF5C1A] uppercase mb-1">BRANDS</p>
-        <p className="text-xs text-gray-400 mb-3">선호 브랜드 선택 (선택사항)</p>
-        <div className="grid grid-cols-4 gap-2 mb-6">
-          {BRANDS.map(b => (
-            <BrandCard key={b.id} id={b.id} label={b.label}
-              on={selectedBrands.includes(b.id)} onClick={() => toggleBrand(b.id)} />
-          ))}
-        </div>
-
-        {/* 스타일 */}
         <p className="text-[10px] font-black tracking-widest text-[#FF5C1A] uppercase mb-1">CATEGORIES</p>
         <p className="text-xs text-gray-400 mb-3">최소 3개 선택 · 홈 피드에 반영됩니다</p>
         <div className="grid grid-cols-3 gap-2.5 mb-6">
