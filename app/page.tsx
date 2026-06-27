@@ -118,9 +118,8 @@ export default function Home() {
   ].join(",");
 
   function buildQuery(base: string): string {
-    const g = profile?.gender === "남성" ? "남자" : profile?.gender === "여성" ? "여자" : "";
-    const a = profile?.ageGroup ?? "";
-    return [a, g, base].filter(Boolean).join(" ");
+    const g = profile?.gender ?? "";
+    return g ? `${g} ${base}` : base;
   }
 
   useEffect(() => {
@@ -199,7 +198,7 @@ export default function Home() {
     : SUGGESTIONS.slice(0, 8);
 
   return (
-    <div className="min-h-screen pb-20" style={{ background: "#F7F0E6" }}>
+    <div className="min-h-screen pb-6" style={{ background: "#F7F0E6" }}>
       {/* Header */}
       <header className="sticky top-0 z-20 px-4 pt-4 pb-3"
         style={{ background: "rgba(247,240,230,0.97)", backdropFilter: "blur(12px)" }}>
@@ -490,46 +489,6 @@ export default function Home() {
       </div>
 
       {/* Bottom Nav */}
-      <nav className="fixed bottom-0 left-0 right-0 flex z-20"
-        style={{ background: "rgba(247,240,230,0.97)", backdropFilter: "blur(12px)", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
-        <button
-          onClick={() => { setTab("feed"); setQuery(""); setActiveStyle(null); setShowDropdown(false); }}
-          className="flex-1 py-3.5 flex justify-center items-center">
-          <div className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
-            tab === "feed" ? "bg-[#FF3D7F] shadow-lg" : ""
-          }`}>
-            <svg width="20" height="20" fill="none" stroke={tab === "feed" ? "#fff" : "#BBB"} strokeWidth="1.8" viewBox="0 0 24 24">
-              <rect x="3" y="3" width="8" height="8" rx="2"/>
-              <rect x="13" y="3" width="8" height="8" rx="2"/>
-              <rect x="3" y="13" width="8" height="8" rx="2"/>
-              <rect x="13" y="13" width="8" height="8" rx="2"/>
-            </svg>
-          </div>
-        </button>
-        <button
-          onClick={openSearch}
-          className="flex-1 py-3.5 flex justify-center items-center">
-          <div className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
-            tab === "search" ? "bg-[#FF3D7F] shadow-lg" : ""
-          }`}>
-            <svg width="20" height="20" fill="none" stroke={tab === "search" ? "#fff" : "#BBB"} strokeWidth="1.8" viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/>
-            </svg>
-          </div>
-        </button>
-        <button
-          onClick={() => user ? router.push("/profile") : handleLogin()}
-          className="flex-1 py-3.5 flex justify-center items-center">
-          <div className="w-11 h-11 rounded-full flex items-center justify-center">
-            {user && profile?.photoURL
-              ? <img src={profile.photoURL} className="w-8 h-8 rounded-full" alt="" referrerPolicy="no-referrer" />
-              : <svg width="20" height="20" fill="none" stroke="#BBB" strokeWidth="1.8" viewBox="0 0 24 24">
-                  <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-                </svg>
-            }
-          </div>
-        </button>
-      </nav>
     </div>
   );
 }
