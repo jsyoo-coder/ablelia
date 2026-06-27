@@ -89,17 +89,6 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
       onTouchEnd={handleTouchEnd}
       onTouchMove={e => e.stopPropagation()}
     >
-      {/* 이미지 영역 */}
-      <div className="flex-1 relative overflow-hidden min-h-0">
-        <img
-          key={step}
-          src={`/images/onboarding/step${step + 1}.png`}
-          alt=""
-          className="w-full h-full object-cover"
-          style={{ animation: "onboardingFadeIn 0.35s ease" }}
-        />
-      </div>
-
       {/* 하단 흰색 카드 */}
       <div
         className="relative bg-white px-6 pt-7 shrink-0"
