@@ -11,6 +11,8 @@ type UserProfile = {
   email: string;
   preferences: string[];
   brands: string[];
+  gender: string;
+  ageGroup: string;
   onboardingComplete: boolean;
 };
 
@@ -20,7 +22,7 @@ type AuthContextType = {
   loading: boolean;
   signInWithGoogle: () => Promise<string | null>;
   logout: () => Promise<void>;
-  updatePreferences: (preferences: string[], brands?: string[]) => Promise<void>;
+  updatePreferences: (preferences: string[], brands?: string[], gender?: string, ageGroup?: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -68,6 +70,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             email: u.email ?? "",
             preferences: [],
             brands: [],
+            gender: "",
+            ageGroup: "",
             onboardingComplete: false,
           };
 
@@ -135,14 +139,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await signOut(auth);
   }
 
-  async function updatePreferences(preferences: string[], brands: string[] = []) {
+  async function updatePreferences(preferences: string[], brands: string[] = [], gender: string = "", ageGroup: string = "") {
     if (!user) return;
-    // 로컬 상태 먼저 업데이트 (메인 페이지 리다이렉트 방지)
-    setProfile((prev) => (prev ? { ...prev, preferences, brands, onboardingComplete: true } : prev));
+    setProfile((prev) => (prev ? { ...prev, preferences, brands, gender, ageGroup, onboardingComplete: true } : prev));
     const { getFirestore, doc, setDoc } = await import("firebase/firestore");
     const db = getFirestore(app);
     const ref = doc(db, "users", user.uid);
-    await setDoc(ref, { preferences, brands, onboardingComplete: true }, { merge: true });
+    await setDoc(ref, { preferences, brands, gender, ageGroup, onboardingComplete: true }, { merge: true });
   }
 
   return (

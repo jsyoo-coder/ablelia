@@ -113,17 +113,24 @@ export default function Home() {
   // 초기 피드 + 관심사/브랜드 변경 시 재요청
   const prefsKey = [
     ...(profile?.preferences ?? []),
-    ...(profile?.brands ?? []),
+    profile?.gender ?? "",
+    profile?.ageGroup ?? "",
   ].join(",");
+
+  function buildQuery(base: string): string {
+    const g = profile?.gender === "남성" ? "남자" : profile?.gender === "여성" ? "여자" : "";
+    const a = profile?.ageGroup ?? "";
+    return [a, g, base].filter(Boolean).join(" ");
+  }
+
   useEffect(() => {
     if (tab !== "feed" || loading) return;
-    if (!profile?.onboardingComplete) { fetchItems(TRENDING[Math.floor(Math.random() * TRENDING.length)], 1, false); return; }
-    const stylePool = (profile.preferences ?? []).map(p => STYLE_QUERIES[p] ?? p);
-    const brandPool = (profile.brands ?? []).map(b => b); // 브랜드명 그대로 검색
-    const pool = [...stylePool, ...brandPool];
-    const q = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : TRENDING[Math.floor(Math.random() * TRENDING.length)];
+    const stylePool = (profile?.preferences ?? []).map(p => STYLE_QUERIES[p] ?? p);
+    const base = stylePool.length > 0
+      ? stylePool[Math.floor(Math.random() * stylePool.length)]
+      : TRENDING[Math.floor(Math.random() * TRENDING.length)];
     setActiveStyle(null);
-    fetchItems(q, 1, false);
+    fetchItems(buildQuery(base), 1, false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, loading, prefsKey]);
 

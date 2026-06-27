@@ -19,10 +19,28 @@ const STYLES = [
   { id: "preppy",   label: "프레피",   q: "프레피 컬리지룩" },
 ];
 
+const GENDERS = ["남성", "여성"];
+const AGE_GROUPS = ["10대", "20대", "30대", "40대 이상"];
+
+function PillButton({ label, on, onClick }: { label: string; on: boolean; onClick: () => void }) {
+  return (
+    <button onClick={onClick}
+      className={`px-4 py-2 rounded-full text-sm font-bold transition-all border-2 ${
+        on
+          ? "bg-[#FF3D7F] text-white border-[#FF3D7F] shadow-sm"
+          : "bg-white text-[#555] border-transparent shadow-sm hover:border-[#FF3D7F] hover:text-[#FF3D7F]"
+      }`}>
+      {label}
+    </button>
+  );
+}
+
 export default function ProfilePage() {
   const { user, profile, loading, logout, updatePreferences } = useAuth();
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
+  const [gender, setGender] = useState("");
+  const [ageGroup, setAgeGroup] = useState("");
   const [showPopup, setShowPopup] = useState(false);
   const [styleImgs, setStyleImgs] = useState<Record<string, string>>({});
 
@@ -30,6 +48,8 @@ export default function ProfilePage() {
     if (loading) return;
     if (!user || !profile) { router.push("/"); return; }
     setSelected(profile.preferences ?? []);
+    setGender(profile.gender ?? "");
+    setAgeGroup(profile.ageGroup ?? "");
   }, [loading, user, profile]);
 
   useEffect(() => {
@@ -62,7 +82,7 @@ export default function ProfilePage() {
 
   function handleSave() {
     setShowPopup(true);
-    updatePreferences(selected, []).catch(console.error);
+    updatePreferences(selected, [], gender, ageGroup).catch(console.error);
     setTimeout(() => { setShowPopup(false); router.push("/"); }, 2000);
   }
 
@@ -105,6 +125,7 @@ export default function ProfilePage() {
       </header>
 
       <div className="max-w-md mx-auto px-5">
+        {/* 유저 카드 */}
         <div className="bg-white rounded-3xl p-4 flex items-center gap-3 mb-6 shadow-sm">
           {profile.photoURL ? (
             <img src={profile.photoURL} alt="" className="w-14 h-14 rounded-full shrink-0" referrerPolicy="no-referrer" />
@@ -116,10 +137,26 @@ export default function ProfilePage() {
           <div className="min-w-0">
             <p className="font-bold text-[#1A1A1A] truncate">{profile.displayName}</p>
             <p className="text-xs text-gray-400 mt-0.5 truncate">{profile.email}</p>
-            <p className="text-xs text-[#FF3D7F] font-semibold mt-1">스타일 {selected.length}개 선택</p>
           </div>
         </div>
 
+        {/* 성별 */}
+        <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase mb-2">GENDER</p>
+        <div className="flex gap-2 mb-6">
+          {GENDERS.map(g => (
+            <PillButton key={g} label={g} on={gender === g} onClick={() => setGender(prev => prev === g ? "" : g)} />
+          ))}
+        </div>
+
+        {/* 나이대 */}
+        <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase mb-2">AGE</p>
+        <div className="flex flex-wrap gap-2 mb-6">
+          {AGE_GROUPS.map(a => (
+            <PillButton key={a} label={a} on={ageGroup === a} onClick={() => setAgeGroup(prev => prev === a ? "" : a)} />
+          ))}
+        </div>
+
+        {/* 스타일 카테고리 */}
         <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase mb-1">CATEGORIES</p>
         <p className="text-xs text-gray-400 mb-3">홈 피드에 반영됩니다</p>
         <div className="grid grid-cols-3 gap-2.5 mb-6">
