@@ -41,11 +41,16 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
   }, []);
 
   useEffect(() => {
-    const color = SLIDES[step].statusBg;
+    const img = `url(/images/onboarding/step${step + 1}.png)`;
     const bar = document.getElementById("status-bar");
-    if (bar) bar.style.background = color;
+    if (bar) {
+      bar.style.backgroundImage = img;
+      bar.style.backgroundSize = "cover";
+      bar.style.backgroundPosition = "top center";
+    }
+    // 모바일 Safari 상단: 이미지 색상값 유지
     const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", color);
+    if (meta) meta.setAttribute("content", SLIDES[step].statusBg);
   }, [step]);
 
   // 배경 스크롤 차단
@@ -75,7 +80,11 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col"
-      style={{ background: SLIDES[step].statusBg, transition: "background 0.35s ease" }}
+      style={{
+        backgroundImage: `url(/images/onboarding/step${step + 1}.png)`,
+        backgroundSize: "cover",
+        backgroundPosition: "top center",
+      }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onTouchMove={e => e.stopPropagation()}
