@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -26,10 +26,12 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  if (!user || !profile) {
-    router.push("/");
-    return null;
-  }
+  useEffect(() => {
+    if (!user || !profile) router.push("/");
+    else setSelected(profile.preferences ?? []);
+  }, [user, profile]);
+
+  if (!user || !profile) return null;
 
   function toggle(id: string) {
     setSelected((prev) =>
