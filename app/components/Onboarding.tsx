@@ -122,7 +122,7 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
         className="relative bg-white px-6 pt-7 shrink-0"
         style={{
           borderRadius: `${R}px 0 0 0`,
-          paddingBottom: "max(env(safe-area-inset-bottom, 0px), 28px)",
+          paddingBottom: "max(env(safe-area-inset-bottom, 0px), 12px)",
         }}
       >
         {/* 우측 상단에만 오목 SVG (R×R) — 좌측 상단 라운드는 CSS border-radius 처리 */}
