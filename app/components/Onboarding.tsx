@@ -20,11 +20,19 @@ const R = 80;
 export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingProps) {
   const [step, setStep] = useState(0);
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+  const [isDesktop, setIsDesktop] = useState(false);
   const touchStartX = useRef(0);
 
   useEffect(() => {
-    // #phone-inner에 포탈 → status bar까지 덮음. 없으면 body 사용 (모바일)
-    setPortalTarget(document.getElementById("phone-inner") ?? document.body);
+    const desktop = window.innerWidth >= 500;
+    setIsDesktop(desktop);
+    // 데스크탑: #phone-inner에 absolute → status bar까지 이미지 덮음
+    // 모바일: body에 fixed → 뷰포트 전체 덮음
+    setPortalTarget(
+      desktop
+        ? (document.getElementById("phone-inner") ?? document.body)
+        : document.body
+    );
   }, []);
 
   // 온보딩 표시 중 배경 스크롤 전면 차단
@@ -55,7 +63,7 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
 
   return createPortal(
     <div
-      className="absolute inset-0 z-50 flex flex-col"
+      className={`${isDesktop ? "absolute" : "fixed"} inset-0 z-50 flex flex-col`}
       style={{ background: "#000" }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}

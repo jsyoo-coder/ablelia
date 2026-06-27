@@ -146,6 +146,8 @@ button, [role="button"], a, label[for] { cursor: pointer; }
     font-size: 15px;
     font-weight: 600;
     letter-spacing: -0.3px;
+    position: relative;
+    z-index: 100;
   }
   #status-icons {
     display: flex;
