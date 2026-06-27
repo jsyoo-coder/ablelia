@@ -1,25 +1,45 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css');
 @import "tailwindcss";
+
+/* 케리스 케듀체 Line — public/fonts/ 에 파일 추가 후 활성화 */
+@font-face {
+  font-family: 'KERISKedu';
+  src: url('/fonts/KERISKeduLine.woff2') format('woff2'),
+       url('/fonts/KERISKeduLine.woff') format('woff'),
+       url('/fonts/KERISKeduLine.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --background: #F7F0E6;
   --foreground: #1A1A1A;
   --accent: #FF5C1A;
+  --font-keris: 'KERISKedu', 'Apple SD Gothic Neo', sans-serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont,
+    'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont,
+    'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+.font-keris {
+  font-family: var(--font-keris);
+}
+
+button, [role="button"], a, label[for] { cursor: pointer; }
 
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-
-button, [role="button"], a, label[for] { cursor: pointer; }

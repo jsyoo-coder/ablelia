@@ -40,8 +40,8 @@ export default function OnboardingPage() {
     <div className="min-h-screen flex flex-col px-5 py-10" style={{ background: "#F7F0E6" }}>
       <div className="w-full max-w-md mx-auto flex-1 flex flex-col">
         {/* Logo */}
-        <h1 className="text-2xl font-black text-[#1A1A1A] mb-8" style={{ letterSpacing: "-0.03em" }}>
-          ablelia
+        <h1 className="text-3xl text-[#1A1A1A] mb-8" style={{ fontFamily: "var(--font-keris)", letterSpacing: "0.01em" }}>
+          Ablelia
         </h1>
 
         {/* Title */}

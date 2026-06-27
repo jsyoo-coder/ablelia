@@ -225,8 +225,8 @@ export default function Home() {
             </div>
           ) : (
             <>
-              <h1 className="text-2xl font-black tracking-tight text-[#1A1A1A]" style={{ letterSpacing: "-0.03em" }}>
-                ablelia
+              <h1 className="font-keris text-3xl text-[#1A1A1A]" style={{ fontFamily: "var(--font-keris)", letterSpacing: "0.01em" }}>
+                Ablelia
               </h1>
               <div className="flex items-center gap-3">
                 <button onClick={openSearch}
