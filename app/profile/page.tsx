@@ -80,10 +80,14 @@ export default function ProfilePage() {
     setSelected(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
   }
 
-  function handleSave() {
+  async function handleSave() {
+    try {
+      await updatePreferences(selected, [], gender, ageGroup);
+    } catch (e) {
+      console.error(e);
+    }
     setShowPopup(true);
-    updatePreferences(selected, [], gender, ageGroup).catch(console.error);
-    setTimeout(() => { setShowPopup(false); router.push("/"); }, 2000);
+    setTimeout(() => { setShowPopup(false); router.push("/"); }, 1500);
   }
 
   async function handleLogout() {
