@@ -42,6 +42,7 @@ export default function ProfilePage() {
   const [gender, setGender] = useState("");
   const [ageGroup, setAgeGroup] = useState("");
   const [showPopup, setShowPopup] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const [styleImgs, setStyleImgs] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -81,13 +82,16 @@ export default function ProfilePage() {
   }
 
   async function handleSave() {
+    setSaveError("");
     try {
       await updatePreferences(selected, [], gender, ageGroup);
-    } catch (e) {
-      console.error(e);
+      setShowPopup(true);
+      setTimeout(() => { setShowPopup(false); router.push("/"); }, 1500);
+    } catch (e: unknown) {
+      const msg = (e as { code?: string })?.code ?? String(e);
+      setSaveError(msg);
+      console.error("저장 실패:", e);
     }
-    setShowPopup(true);
-    setTimeout(() => { setShowPopup(false); router.push("/"); }, 1500);
   }
 
   async function handleLogout() {
@@ -186,6 +190,11 @@ export default function ProfilePage() {
           })}
         </div>
 
+        {saveError && (
+          <p className="text-xs text-red-500 text-center mb-3">
+            저장 실패: {saveError}
+          </p>
+        )}
         <button onClick={handleSave}
           className="w-full py-4 rounded-2xl text-sm font-bold transition-all bg-[#FF3D7F] text-white hover:bg-[#d42d6e] shadow-md">
           취향 저장
