@@ -20,27 +20,65 @@ const STYLES = [
 ];
 
 const BRANDS = [
-  { id: "nike",            label: "나이키",        q: "나이키 Nike" },
-  { id: "adidas",          label: "아디다스",      q: "아디다스 Adidas" },
-  { id: "newbalance",      label: "뉴발란스",      q: "뉴발란스 New Balance" },
-  { id: "northface",       label: "노스페이스",    q: "노스페이스 The North Face" },
-  { id: "uniqlo",          label: "유니클로",      q: "유니클로 Uniqlo" },
-  { id: "zara",            label: "자라",          q: "Zara 자라 패션" },
-  { id: "musinsa",         label: "무신사스탠다드", q: "무신사 스탠다드" },
-  { id: "covernat",        label: "커버낫",        q: "Covernat 커버낫" },
-  { id: "stussy",          label: "스투시",        q: "Stussy 스투시" },
-  { id: "levis",           label: "리바이스",      q: "Levis 리바이스" },
-  { id: "polo",            label: "폴로",          q: "Polo Ralph Lauren" },
-  { id: "patagonia",       label: "파타고니아",    q: "Patagonia 파타고니아" },
-  { id: "adererror",       label: "아더에러",      q: "Ader Error 아더에러" },
-  { id: "thisisneverthat", label: "디스이즈네버댓", q: "thisisneverthat 디스이즈네버댓" },
-  { id: "arcteryx",        label: "아크테릭스",    q: "Arcteryx 아크테릭스" },
-  { id: "spao",            label: "스파오",        q: "SPAO 스파오" },
-  { id: "mahagrid",        label: "마하그리드",    q: "Mahagrid 마하그리드" },
-  { id: "anderbell",       label: "앤더슨벨",      q: "Andersson Bell 앤더슨벨" },
-  { id: "champion",        label: "챔피온",        q: "Champion 챔피온" },
-  { id: "8seconds",        label: "에잇세컨즈",    q: "8seconds 에잇세컨즈" },
+  { id: "nike",            label: "Nike",           logo: "https://logo.clearbit.com/nike.com",            q: "나이키 Nike" },
+  { id: "adidas",          label: "Adidas",         logo: "https://logo.clearbit.com/adidas.com",          q: "아디다스 Adidas" },
+  { id: "newbalance",      label: "New Balance",    logo: "https://logo.clearbit.com/newbalance.com",      q: "뉴발란스 New Balance" },
+  { id: "northface",       label: "North Face",     logo: "https://logo.clearbit.com/thenorthface.com",    q: "노스페이스 The North Face" },
+  { id: "uniqlo",          label: "Uniqlo",         logo: "https://logo.clearbit.com/uniqlo.com",          q: "유니클로 Uniqlo" },
+  { id: "zara",            label: "Zara",           logo: "https://logo.clearbit.com/zara.com",            q: "Zara 자라 패션" },
+  { id: "stussy",          label: "Stüssy",         logo: "https://logo.clearbit.com/stussy.com",          q: "Stussy 스투시" },
+  { id: "levis",           label: "Levi's",         logo: "https://logo.clearbit.com/levi.com",            q: "Levis 리바이스" },
+  { id: "polo",            label: "Polo RL",        logo: "https://logo.clearbit.com/ralphlauren.com",     q: "Polo Ralph Lauren" },
+  { id: "patagonia",       label: "Patagonia",      logo: "https://logo.clearbit.com/patagonia.com",       q: "Patagonia 파타고니아" },
+  { id: "arcteryx",        label: "Arc'teryx",      logo: "https://logo.clearbit.com/arcteryx.com",        q: "Arcteryx 아크테릭스" },
+  { id: "champion",        label: "Champion",       logo: "https://logo.clearbit.com/champion.com",        q: "Champion 챔피온" },
+  { id: "musinsa",         label: "무신사 스탠다드", logo: "https://logo.clearbit.com/musinsa.com",         q: "무신사 스탠다드" },
+  { id: "covernat",        label: "Covernat",       logo: "https://logo.clearbit.com/covernat.com",        q: "Covernat 커버낫" },
+  { id: "adererror",       label: "Ader Error",     logo: "https://logo.clearbit.com/adererror.com",       q: "Ader Error 아더에러" },
+  { id: "thisisneverthat", label: "thisisneverthat", logo: "https://logo.clearbit.com/thisisneverthat.com", q: "thisisneverthat 디스이즈네버댓" },
+  { id: "mahagrid",        label: "Mahagrid",       logo: "https://logo.clearbit.com/mahagrid.com",        q: "Mahagrid 마하그리드" },
+  { id: "anderbell",       label: "Andersson Bell", logo: "https://logo.clearbit.com/anderssonbell.com",   q: "Andersson Bell 앤더슨벨" },
+  { id: "spao",            label: "SPAO",           logo: "https://logo.clearbit.com/spao.com",            q: "SPAO 스파오" },
+  { id: "8seconds",        label: "8seconds",       logo: "https://logo.clearbit.com/8seconds.co.kr",      q: "8seconds 에잇세컨즈" },
+  { id: "other",           label: "기타",            logo: "",                                               q: "" },
 ];
+
+function BrandCard({ id, label, logo, on, onClick }: {
+  id: string; label: string; logo: string; on: boolean; onClick: () => void;
+}) {
+  const [imgErr, setImgErr] = useState(false);
+  const isOther = id === "other";
+  return (
+    <button onClick={onClick}
+      className={`relative flex flex-col items-center justify-center gap-1.5 rounded-2xl aspect-square transition-all p-2 ${
+        on ? "bg-[#FFF0EA] ring-[2.5px] ring-[#FF5C1A] shadow-md z-10" : "bg-white shadow-sm hover:shadow-md"
+      }`}>
+      {isOther ? (
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center ${on ? "bg-[#FF5C1A]" : "bg-[#F0EBE3]"}`}>
+          <svg width="18" height="18" fill="none" stroke={on ? "white" : "#999"} strokeWidth="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+          </svg>
+        </div>
+      ) : logo && !imgErr ? (
+        <img src={logo} alt={label} className="w-9 h-9 object-contain" onError={() => setImgErr(true)} />
+      ) : (
+        <div className="w-9 h-9 flex items-center justify-center">
+          <span className="text-[9px] font-black text-gray-400 text-center leading-tight">{label.slice(0, 6)}</span>
+        </div>
+      )}
+      <p className={`text-[9px] font-bold text-center leading-tight line-clamp-1 w-full px-0.5 ${on ? "text-[#FF5C1A]" : "text-[#555]"}`}>
+        {label}
+      </p>
+      {on && (
+        <div className="absolute top-1 right-1 w-4 h-4 bg-[#FF5C1A] rounded-full flex items-center justify-center">
+          <svg width="8" height="8" fill="none" stroke="white" strokeWidth="3" viewBox="0 0 24 24">
+            <path d="M20 6L9 17l-5-5"/>
+          </svg>
+        </div>
+      )}
+    </button>
+  );
+}
 
 export default function ProfilePage() {
   const { user, profile, loading, logout, updatePreferences } = useAuth();
@@ -50,7 +88,6 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [styleImgs, setStyleImgs] = useState<Record<string, string>>({});
-  const [brandImgs, setBrandImgs] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (loading) return;
@@ -61,26 +98,17 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function loadImages() {
-      const allItems = [...STYLES, ...BRANDS];
       const entries = await Promise.allSettled(
-        allItems.map(async (s) => {
+        STYLES.map(async (s) => {
           const res = await fetch(`/api/search?q=${encodeURIComponent(s.q)}&display=5`);
           const data = await res.json();
-          const items: { image?: string }[] = data.items ?? [];
-          const img = items.find(i => i.image)?.image ?? "";
+          const img = (data.items ?? []).find((i: { image?: string }) => i.image)?.image ?? "";
           return { id: s.id, img };
         })
       );
-      const styleMap: Record<string, string> = {};
-      const brandMap: Record<string, string> = {};
-      entries.forEach((r, i) => {
-        if (r.status === "fulfilled" && r.value.img) {
-          if (i < STYLES.length) styleMap[r.value.id] = r.value.img;
-          else brandMap[r.value.id] = r.value.img;
-        }
-      });
-      setStyleImgs(styleMap);
-      setBrandImgs(brandMap);
+      const map: Record<string, string> = {};
+      entries.forEach(r => { if (r.status === "fulfilled" && r.value.img) map[r.value.id] = r.value.img; });
+      setStyleImgs(map);
     }
     loadImages();
   }, []);
@@ -158,26 +186,10 @@ export default function ProfilePage() {
         <p className="text-[10px] font-black tracking-widest text-[#FF5C1A] uppercase mb-1">BRANDS</p>
         <p className="text-xs text-gray-400 mb-3">선호 브랜드 선택 (선택사항)</p>
         <div className="grid grid-cols-4 gap-2 mb-6">
-          {BRANDS.map(b => {
-            const on = selectedBrands.includes(b.id);
-            const img = brandImgs[b.id];
-            return (
-              <button key={b.id} onClick={() => toggleBrand(b.id)}
-                className={`relative flex flex-col items-end justify-end overflow-hidden rounded-2xl transition-all aspect-square ${
-                  on ? "ring-[3px] ring-[#FF5C1A] shadow-lg z-10" : "shadow-sm hover:shadow-md"
-                }`}>
-                {img ? <img src={img} alt={b.label} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-                  : <div className="absolute inset-0 bg-[#EDE6DA] animate-pulse" />}
-                <div className="absolute inset-0" style={{ background: on ? "linear-gradient(to top, rgba(255,92,26,0.85) 0%, rgba(255,92,26,0.3) 55%, rgba(0,0,0,0.1) 100%)" : "linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.15) 55%, transparent 100%)" }} />
-                {on && <div className="absolute top-1.5 right-1.5 w-4 h-4 bg-white rounded-full flex items-center justify-center shadow">
-                  <svg width="9" height="9" fill="none" stroke="#FF5C1A" strokeWidth="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                </div>}
-                <div className="relative z-10 pb-2 px-1.5 w-full">
-                  <p className="text-white text-[10px] font-black drop-shadow leading-tight">{b.label}</p>
-                </div>
-              </button>
-            );
-          })}
+          {BRANDS.map(b => (
+            <BrandCard key={b.id} id={b.id} label={b.label} logo={b.logo}
+              on={selectedBrands.includes(b.id)} onClick={() => toggleBrand(b.id)} />
+          ))}
         </div>
 
         {/* 스타일 */}
