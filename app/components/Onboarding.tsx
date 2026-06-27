@@ -119,8 +119,8 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
           viewBox={`0 0 ${R} ${R}`}
           fill="white"
         >
-          {/* 우하단에만 흰색, 좌상단에 녹색 원 — (R,0)→arc→(0,R) → 우하단 닫기 */}
-          <path d={`M${R} 0 A${R} ${R} 0 0 0 0 ${R} L${R} ${R} Z`} />
+          {/* 흰색=우하단 소면적, 녹색=좌상단 대면적 — (0,R)→arc→(R,0) sweep=1(시계) */}
+          <path d={`M0 ${R} A${R} ${R} 0 0 1 ${R} 0 L${R} ${R} Z`} />
         </svg>
 
         {/* 닷 인디케이터 */}
