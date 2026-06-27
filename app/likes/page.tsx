@@ -12,6 +12,7 @@ export default function LikesPage() {
   const router = useRouter();
   const [likedProducts, setLikedProducts] = useState<Product[]>([]);
   const [fetching, setFetching] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [masoncols, setMasoncols] = useState(2);
 
@@ -42,7 +43,11 @@ export default function LikesPage() {
       unsubscribe = onSnapshot(q, snap => {
         setLikedProducts(snap.docs.map(d => d.data() as Product));
         setFetching(false);
-      }, () => setFetching(false));
+      }, (err) => {
+        console.error("찜 목록 로드 실패:", err);
+        setFetchError(true);
+        setFetching(false);
+      });
     }
 
     setup();
@@ -97,6 +102,11 @@ export default function LikesPage() {
                 ))}
               </div>
             ))}
+          </div>
+        ) : fetchError ? (
+          <div className="flex flex-col items-center justify-center py-24 gap-3">
+            <p className="text-sm font-semibold text-gray-400">데이터를 불러올 수 없어요</p>
+            <p className="text-xs text-gray-300 text-center px-6">Firebase Console → Firestore → 규칙에서<br/>liked_products 서브컬렉션 접근을 허용해주세요</p>
           </div>
         ) : likedProducts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4">
