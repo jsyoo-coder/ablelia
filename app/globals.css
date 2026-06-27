@@ -42,3 +42,8 @@ button, [role="button"], a, label[for] { cursor: pointer; }
 
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+@keyframes detailSlideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}

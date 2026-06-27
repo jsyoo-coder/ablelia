@@ -4,6 +4,8 @@ import { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } fr
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import ProductCard from "./components/ProductCard";
+import type { Product as ProductType } from "./components/ProductCard";
+import ProductDetail from "./components/ProductDetail";
 
 const STYLE_QUERIES: Record<string, string> = {
   minimal: "미니멀 베이직 패션",
@@ -46,10 +48,7 @@ const STYLE_ITEMS: Record<string, string[]> = {
   preppy:   ["체크 스커트", "카디건", "니트 조끼", "로퍼", "컬리지 셔츠"],
 };
 
-type Product = {
-  title: string; link: string; image: string;
-  lprice: string; mallName: string; brand: string; category2: string;
-};
+type Product = ProductType;
 
 const RECENT_KEY = "ablelia_recent_searches";
 
@@ -76,6 +75,7 @@ export default function Home() {
   const [signingIn, setSigningIn] = useState(false);
   const [searchSubmitted, setSearchSubmitted] = useState(false);
   const [masoncols, setMasoncols] = useState(2);
+  const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(null);
   const currentQueryRef = useRef("");
   const startRef = useRef(1);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -292,6 +292,13 @@ export default function Home() {
 
   return (
     <div className="min-h-screen pb-6" style={{ background: "#F7F0E6" }}>
+      {selectedProduct && (
+        <ProductDetail
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+          onSelect={setSelectedProduct}
+        />
+      )}
       {/* Header */}
       <header className="sticky top-0 z-20 px-4 pt-4 pb-3"
         style={{ background: "rgba(247,240,230,0.97)", backdropFilter: "blur(12px)" }}>
@@ -501,7 +508,7 @@ export default function Home() {
               {Array.from({ length: masoncols }, (_, col) => col).map(col => (
                 <div key={col} className="flex-1 flex flex-col min-w-0">
                   {items.map((item, i) => ({ item, i })).filter(({ i }) => i % masoncols === col).map(({ item, i }) => (
-                    <ProductCard key={`${item.link}-${i}`} product={item} isNew={i < 6} />
+                    <ProductCard key={`${item.link}-${i}`} product={item} isNew={i < 6} onSelect={setSelectedProduct} />
                   ))}
                 </div>
               ))}
@@ -606,7 +613,7 @@ export default function Home() {
               {Array.from({ length: masoncols }, (_, col) => col).map(col => (
                 <div key={col} className="flex-1 flex flex-col min-w-0">
                   {items.map((item, i) => ({ item, i })).filter(({ i }) => i % masoncols === col).map(({ item, i }) => (
-                    <ProductCard key={`${item.link}-${i}`} product={item} isNew={i < 6} />
+                    <ProductCard key={`${item.link}-${i}`} product={item} isNew={i < 6} onSelect={setSelectedProduct} />
                   ))}
                 </div>
               ))}
