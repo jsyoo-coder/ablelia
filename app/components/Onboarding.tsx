@@ -124,8 +124,8 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
           preserveAspectRatio="none"
           fill="white"
         >
-          {/* 좌: Q 52 52 → 오목(배경이 파고드는 느낌), 우: Q 390 0 → 볼록 */}
-          <path d="M0 52 Q52 52 52 0 L338 0 Q390 0 390 52 Z" />
+          {/* 좌: Q 0 0 → 볼록(흰 영역이 위로 솟음), 우: Q 338 52 → 오목(배경이 파고듦) */}
+          <path d="M0 52 Q0 0 52 0 L338 0 Q338 52 390 52 Z" />
         </svg>
         {/* 닷 인디케이터 */}
         <div className="flex justify-center gap-2 mb-7">
