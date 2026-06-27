@@ -111,9 +111,21 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
 
       {/* 하단 흰색 카드 */}
       <div
-        className="bg-white rounded-t-[36px] px-6 pt-8 shrink-0"
-        style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 28px)" }}
+        className="relative bg-white px-6 pt-8 shrink-0"
+        style={{
+          borderRadius: "0 44px 0 0",
+          paddingBottom: "max(env(safe-area-inset-bottom, 0px), 28px)",
+        }}
       >
+        {/* 왼쪽 상단 오목 코너: radial-gradient로 배경색이 파고드는 효과 */}
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            top: -44, left: 0,
+            width: 44, height: 44,
+            background: "radial-gradient(circle at 100% 100%, transparent 71%, white 71%)",
+          }}
+        />
         {/* 닷 인디케이터 */}
         <div className="flex justify-center gap-2 mb-7">
           {SLIDES.map((_, i) => (
