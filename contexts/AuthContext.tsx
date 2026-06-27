@@ -17,7 +17,7 @@ type AuthContextType = {
   user: User | null;
   profile: UserProfile | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
+  signInWithGoogle: () => Promise<string | null>;
   logout: () => Promise<void>;
   updatePreferences: (preferences: string[]) => Promise<void>;
 };
@@ -69,10 +69,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe?.();
   }, []);
 
-  async function signInWithGoogle() {
-    const { getAuth, GoogleAuthProvider, signInWithPopup } = await import("firebase/auth");
-    const auth = getAuth(app);
-    await signInWithPopup(auth, new GoogleAuthProvider());
+  async function signInWithGoogle(): Promise<string | null> {
+    try {
+      const { getAuth, GoogleAuthProvider, signInWithPopup } = await import("firebase/auth");
+      const auth = getAuth(app);
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+      await signInWithPopup(auth, provider);
+      return null;
+    } catch (e: unknown) {
+      const code = (e as { code?: string })?.code ?? "";
+      if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") return null;
+      if (code === "auth/unauthorized-domain") return "이 도메인이 Firebase에 등록되지 않았습니다. Firebase Console → Authentication → Settings → Authorized domains에 현재 주소를 추가해주세요.";
+      if (code === "auth/invalid-api-key") return "Firebase 환경변수가 Vercel에 설정되지 않았습니다.";
+      return `로그인 실패: ${code || String(e)}`;
+    }
   }
 
   async function logout() {
