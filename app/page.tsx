@@ -292,12 +292,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen pb-6" style={{ background: "#F7F0E6" }}>
-      {selectedProduct && (
+      {selectedProduct && tab !== "search" && (
         <ProductDetail
           product={selectedProduct}
           onClose={() => setSelectedProduct(null)}
           onSelect={setSelectedProduct}
-          onSearchOpen={() => { setSelectedProduct(null); setTab("search"); }}
+          onSearchOpen={() => setTab("search")}
         />
       )}
       {/* Header */}
