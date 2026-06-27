@@ -1,9 +1,8 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { User, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
+import type { User } from "firebase/auth";
+import { app } from "@/lib/firebase";
 
 type UserProfile = {
   uid: string;
@@ -31,47 +30,64 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (u) => {
-      setUser(u);
-      if (u) {
-        const ref = doc(db, "users", u.uid);
-        const snap = await getDoc(ref);
-        if (snap.exists()) {
-          setProfile(snap.data() as UserProfile);
+    let unsubscribe: (() => void) | undefined;
+
+    async function init() {
+      // getAuth / getFirestore는 브라우저(useEffect)에서만 호출
+      const { getAuth, onAuthStateChanged } = await import("firebase/auth");
+      const { getFirestore, doc, getDoc, setDoc } = await import("firebase/firestore");
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      unsubscribe = onAuthStateChanged(auth, async (u) => {
+        setUser(u);
+        if (u) {
+          const ref = doc(db, "users", u.uid);
+          const snap = await getDoc(ref);
+          if (snap.exists()) {
+            setProfile(snap.data() as UserProfile);
+          } else {
+            const newProfile: UserProfile = {
+              uid: u.uid,
+              displayName: u.displayName ?? "",
+              photoURL: u.photoURL ?? "",
+              email: u.email ?? "",
+              preferences: [],
+              onboardingComplete: false,
+            };
+            await setDoc(ref, newProfile);
+            setProfile(newProfile);
+          }
         } else {
-          const newProfile: UserProfile = {
-            uid: u.uid,
-            displayName: u.displayName ?? "",
-            photoURL: u.photoURL ?? "",
-            email: u.email ?? "",
-            preferences: [],
-            onboardingComplete: false,
-          };
-          await setDoc(ref, newProfile);
-          setProfile(newProfile);
+          setProfile(null);
         }
-      } else {
-        setProfile(null);
-      }
-      setLoading(false);
-    });
-    return unsub;
+        setLoading(false);
+      });
+    }
+
+    init();
+    return () => unsubscribe?.();
   }, []);
 
   async function signInWithGoogle() {
-    const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    const { getAuth, GoogleAuthProvider, signInWithPopup } = await import("firebase/auth");
+    const auth = getAuth(app);
+    await signInWithPopup(auth, new GoogleAuthProvider());
   }
 
   async function logout() {
+    const { getAuth, signOut } = await import("firebase/auth");
+    const auth = getAuth(app);
     await signOut(auth);
   }
 
   async function updatePreferences(preferences: string[]) {
     if (!user) return;
+    const { getFirestore, doc, setDoc } = await import("firebase/firestore");
+    const db = getFirestore(app);
     const ref = doc(db, "users", user.uid);
     await setDoc(ref, { preferences, onboardingComplete: true }, { merge: true });
-    setProfile((prev) => prev ? { ...prev, preferences, onboardingComplete: true } : prev);
+    setProfile((prev) => (prev ? { ...prev, preferences, onboardingComplete: true } : prev));
   }
 
   return (
