@@ -20,17 +20,32 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
   const [step, setStep] = useState(0);
   const touchStartX = useRef(0);
 
-  // status-bar 배경을 이미지 상단 색상으로 맞춤
+  // PC: status-bar DOM 배경 / 모바일 Safari: theme-color meta 태그로 상단 색상 제어
   useEffect(() => {
     const bar = document.getElementById("status-bar");
-    if (!bar) return;
-    const prevBg = bar.style.background;
-    return () => { bar.style.background = prevBg; };
+    const prevBarBg = bar?.style.background ?? "";
+
+    let themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    const prevTheme = themeMeta?.getAttribute("content") ?? null;
+    if (!themeMeta) {
+      themeMeta = document.createElement("meta");
+      themeMeta.setAttribute("name", "theme-color");
+      document.head.appendChild(themeMeta);
+    }
+
+    return () => {
+      if (bar) bar.style.background = prevBarBg;
+      if (prevTheme) themeMeta!.setAttribute("content", prevTheme);
+      else themeMeta!.remove();
+    };
   }, []);
 
   useEffect(() => {
+    const color = SLIDES[step].statusBg;
     const bar = document.getElementById("status-bar");
-    if (bar) bar.style.background = SLIDES[step].statusBg;
+    if (bar) bar.style.background = color;
+    const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", color);
   }, [step]);
 
   // 배경 스크롤 차단
@@ -60,6 +75,7 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col"
+      style={{ background: "#000" }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onTouchMove={e => e.stopPropagation()}
