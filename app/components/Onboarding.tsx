@@ -106,7 +106,7 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
 
       {/* 하단 흰색 카드 */}
       <div
-        className="relative bg-white px-6 pt-5 shrink-0"
+        className="relative bg-white px-6 pt-2 shrink-0"
         style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 28px)" }}
       >
         {/*
@@ -122,7 +122,8 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
           preserveAspectRatio="none"
           fill="white"
         >
-          <path d={`M0 ${R} Q0 0 ${R} 0 L${390 - R} 0 A${R} ${R} 0 0 0 390 ${R} Z`} />
+          {/* 좌 볼록: Q0 0 R 0  /  우 오목(좌측 거울): Q390 0 390 R */}
+          <path d={`M0 ${R} Q0 0 ${R} 0 L${390 - R} 0 Q390 0 390 ${R} Z`} />
         </svg>
 
         {/* 닷 인디케이터 */}
