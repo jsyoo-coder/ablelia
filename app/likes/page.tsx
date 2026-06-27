@@ -7,10 +7,20 @@ import ProductCard from "@/app/components/ProductCard";
 import type { Product } from "@/app/components/ProductCard";
 import ProductDetail from "@/app/components/ProductDetail";
 
+function productDocId(link: string): string {
+  let h = 5381;
+  for (let i = 0; i < link.length; i++) {
+    h = ((h << 5) + h) ^ link.charCodeAt(i);
+    h = h >>> 0;
+  }
+  return h.toString(36);
+}
+
 export default function LikesPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [likedProducts, setLikedProducts] = useState<Product[]>([]);
+  const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
   const [fetching, setFetching] = useState(true);
   const [fetchError, setFetchError] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -53,6 +63,30 @@ export default function LikesPage() {
     setup();
     return () => unsubscribe?.();
   }, [user, loading]);
+
+  // 찜한 상품들의 전체 좋아요 카운트 조회
+  useEffect(() => {
+    if (likedProducts.length === 0) { setLikeCounts({}); return; }
+    async function fetchCounts() {
+      try {
+        const { getFirestore, collection, query, where, documentId, getDocs } = await import("firebase/firestore");
+        const { app } = await import("@/lib/firebase");
+        const db = getFirestore(app);
+        const docIds = likedProducts.map(p => productDocId(p.link));
+        // Firestore 'in' 쿼리는 최대 30개 제한 → 청크 처리
+        const counts: Record<string, number> = {};
+        for (let i = 0; i < docIds.length; i += 30) {
+          const chunk = docIds.slice(i, i + 30);
+          const snap = await getDocs(
+            query(collection(db, "product_likes"), where(documentId(), "in", chunk))
+          );
+          snap.docs.forEach(d => { counts[d.data().link] = d.data().count ?? 0; });
+        }
+        setLikeCounts(counts);
+      } catch {}
+    }
+    fetchCounts();
+  }, [likedProducts]);
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: "#F7F0E6" }}>
@@ -129,7 +163,7 @@ export default function LikesPage() {
                   .map((item, i) => ({ item, i }))
                   .filter(({ i }) => i % masoncols === col)
                   .map(({ item, i }) => (
-                    <ProductCard key={`${item.link}-${i}`} product={item} onSelect={setSelectedProduct} />
+                    <ProductCard key={`${item.link}-${i}`} product={item} likeCount={likeCounts[item.link]} onSelect={setSelectedProduct} />
                   ))}
               </div>
             ))}
