@@ -53,16 +53,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (u) {
               const ref = doc(db, "users", u.uid);
               const snap = await getDoc(ref);
+              // Firebase Auth의 photoURL/displayName은 항상 최신 — Firestore 값 위에 덮어씀
+              const authOverride = {
+                photoURL: u.photoURL ?? "",
+                displayName: u.displayName ?? "",
+                email: u.email ?? "",
+              };
               if (snap.exists()) {
-                setProfile(snap.data() as UserProfile);
+                const stored = snap.data() as UserProfile;
+                const merged = { ...stored, ...authOverride };
+                // photoURL이 바뀌었으면 Firestore도 업데이트
+                if (stored.photoURL !== authOverride.photoURL && authOverride.photoURL) {
+                  const { updateDoc } = await import("firebase/firestore");
+                  await updateDoc(ref, { photoURL: authOverride.photoURL });
+                }
+                setProfile(merged);
               } else {
                 const newProfile: UserProfile = {
                   uid: u.uid,
-                  displayName: u.displayName ?? "",
-                  photoURL: u.photoURL ?? "",
-                  email: u.email ?? "",
                   preferences: [],
                   onboardingComplete: false,
+                  ...authOverride,
                 };
                 await setDoc(ref, newProfile);
                 setProfile(newProfile);
