@@ -119,7 +119,8 @@ export default function Home() {
 
   function buildQuery(base: string): string {
     const g = profile?.gender ?? "";
-    return g ? `${g} ${base}` : base;
+    const a = (profile?.ageGroup ?? "").replace(" 이상", "");
+    return [a, g, base].filter(Boolean).join(" ");
   }
 
   useEffect(() => {
