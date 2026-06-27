@@ -498,22 +498,36 @@ export default function Home() {
         )}
 
         {fetching ? (
-          <div className="columns-2 sm:columns-3 md:columns-4 gap-3">
-            {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} className="break-inside-avoid mb-3 rounded-3xl bg-white animate-pulse shadow-sm overflow-hidden">
-                <div className="rounded-3xl m-2" style={{ height: `${160 + (i % 4) * 50}px`, background: "#EDE6DA" }} />
-                <div className="px-3 py-2.5 space-y-1.5">
-                  <div className="h-2 bg-gray-100 rounded-full w-16" />
-                  <div className="h-3 bg-gray-100 rounded-full w-full" />
-                  <div className="h-3 bg-gray-100 rounded-full w-3/4" />
-                </div>
+          <div className="flex gap-3">
+            {[0, 1].map(col => (
+              <div key={col} className="flex-1 flex flex-col min-w-0">
+                {Array.from({ length: 6 }).map((_, i) => {
+                  const idx = col + i * 2;
+                  return (
+                    <div key={idx} className="mb-3 rounded-3xl bg-white animate-pulse shadow-sm overflow-hidden">
+                      <div className="rounded-3xl m-2" style={{ height: `${160 + (idx % 4) * 50}px`, background: "#EDE6DA" }} />
+                      <div className="px-3 py-2.5 space-y-1.5">
+                        <div className="h-2 bg-gray-100 rounded-full w-16" />
+                        <div className="h-3 bg-gray-100 rounded-full w-full" />
+                        <div className="h-3 bg-gray-100 rounded-full w-3/4" />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             ))}
           </div>
         ) : (
-          <div className="columns-2 sm:columns-3 md:columns-4 gap-3">
-            {items.map((item, i) => (
-              <ProductCard key={`${item.link}-${i}`} product={item} isNew={i < 6} />
+          <div className="flex gap-3">
+            {[0, 1].map(col => (
+              <div key={col} className="flex-1 flex flex-col min-w-0">
+                {items
+                  .map((item, i) => ({ item, i }))
+                  .filter(({ i }) => i % 2 === col)
+                  .map(({ item, i }) => (
+                    <ProductCard key={`${item.link}-${i}`} product={item} isNew={i < 6} />
+                  ))}
+              </div>
             ))}
           </div>
         )}

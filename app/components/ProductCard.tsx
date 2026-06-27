@@ -18,7 +18,7 @@ export default function ProductCard({ product, isNew }: { product: Product; isNe
       href={product.link}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block break-inside-avoid mb-3"
+      className="group block mb-3"
     >
       <div className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
         {/* Image container */}
