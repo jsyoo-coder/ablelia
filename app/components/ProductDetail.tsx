@@ -192,13 +192,8 @@ export default function ProductDetail({
 
   return (
     <div
-      className="z-50 flex flex-col"
-      style={{
-        position: "fixed", top: 0, bottom: 0,
-        left: "max(0px, calc(50vw - 195px))",
-        width: "min(100vw, 390px)",
-        background: "#F7F0E6", animation: "detailSlideUp 0.28s ease-out",
-      }}
+      className="fixed inset-0 z-50 flex flex-col"
+      style={{ background: "#F7F0E6", animation: "detailSlideUp 0.28s ease-out" }}
     >
       {/* ── Header ── */}
       <div className="shrink-0 flex items-center justify-between px-4 pt-4 pb-3" style={headerBg}>

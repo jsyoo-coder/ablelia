@@ -47,3 +47,91 @@ button, [role="button"], a, label[for] { cursor: pointer; }
   from { transform: translateY(100%); }
   to   { transform: translateY(0); }
 }
+
+/* ── 폰 프레임 (데스크탑) ── */
+#phone-power { display: none; }
+
+@media (min-width: 500px) {
+  html {
+    background: radial-gradient(ellipse at 35% 30%, #2a2520 0%, #0f0d0b 100%);
+    min-height: 100vh;
+  }
+  body {
+    background: transparent !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 32px 0;
+  }
+  #phone-outer {
+    position: relative;
+    isolation: isolate;
+    width: 410px;
+    border-radius: 56px;
+    background: linear-gradient(155deg, #3e3e40 0%, #1c1c1e 55%, #141416 100%);
+    padding: 10px;
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,0.13),
+      inset 0 1px 0 rgba(255,255,255,0.07),
+      0 0 0 1px rgba(0,0,0,0.95),
+      0 80px 160px rgba(0,0,0,0.7),
+      0 30px 60px rgba(0,0,0,0.4);
+  }
+  /* 다이나믹 아일랜드 */
+  #phone-outer::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 34px;
+    background: #000;
+    border-radius: 18px;
+    z-index: 300;
+    pointer-events: none;
+  }
+  /* 볼륨 버튼 (좌측) */
+  #phone-outer::after {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: 155px;
+    width: 5px;
+    height: 34px;
+    background: #2e2e30;
+    border-radius: 3px 0 0 3px;
+    box-shadow: 0 50px 0 #2e2e30;
+  }
+  /* 전원 버튼 (우측) */
+  #phone-power {
+    display: block;
+    position: absolute;
+    right: -5px;
+    top: 200px;
+    width: 5px;
+    height: 68px;
+    background: #2e2e30;
+    border-radius: 0 3px 3px 0;
+  }
+  #phone-inner {
+    position: relative;
+    z-index: 1;
+    width: 390px;
+    border-radius: 47px;
+    overflow: hidden;
+    transform: translateZ(0);
+  }
+  #phone-screen {
+    width: 390px;
+    height: calc(100vh - 80px);
+    max-height: 852px;
+    min-height: 580px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #F7F0E6;
+    scrollbar-width: none;
+  }
+  #phone-screen::-webkit-scrollbar { display: none; }
+}
