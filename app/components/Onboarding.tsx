@@ -32,7 +32,7 @@ const SLIDES = [
   },
 ];
 
-const CURVE_H = 80;
+const R = 80; // 코너 반지름
 
 export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingProps) {
   const [step, setStep] = useState(0);
@@ -61,7 +61,6 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
     >
       {/* 상단 일러스트 영역 */}
       <div className="flex-1 relative flex items-center justify-center overflow-hidden min-h-0">
-        {/* 배경 원형 장식 */}
         <div className="absolute rounded-full pointer-events-none" style={{
           width: 300, height: 300,
           background: "rgba(255,255,255,0.10)",
@@ -73,7 +72,6 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
           bottom: 20, left: -50,
         }} />
 
-        {/* 세로 키워드 (우측) */}
         <div
           className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none select-none"
           style={{
@@ -89,15 +87,12 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
           {slide.keyword}
         </div>
 
-        {/* 중앙 태그 카드 */}
         <div className="relative z-10 flex flex-col items-center">
           <div className="w-4 h-4 rounded-full bg-white opacity-80 mb-2" />
           <div className="w-px h-4 bg-white opacity-40 mb-1" />
           <div className="bg-white rounded-3xl px-8 py-6 text-center"
             style={{ boxShadow: "0 24px 64px rgba(0,0,0,0.18)" }}>
-            <p className="text-[10px] font-black tracking-[0.2em] text-gray-300 mb-2 uppercase">
-              ablelia
-            </p>
+            <p className="text-[10px] font-black tracking-[0.2em] text-gray-300 mb-2 uppercase">ablelia</p>
             <h3 className="font-black italic text-[#1A1A1A] leading-none" style={{ fontSize: 44 }}>
               {slide.keyword}
             </h3>
@@ -111,29 +106,27 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
 
       {/* 하단 흰색 카드 */}
       <div
-        className="relative bg-white px-6 shrink-0"
-        style={{
-          paddingTop: CURVE_H,
-          paddingBottom: "max(env(safe-area-inset-bottom, 0px), 28px)",
-        }}
+        className="relative bg-white px-6 pt-5 shrink-0"
+        style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 28px)" }}
       >
         {/*
-          좌: 볼록(흰 영역이 위로 솟음)  M0 H  Q0 0 R 0
-          우: 오목(배경이 파고듦)         L W-R 0  A R R 0 0 0 W H
-              sweep-flag=0 → 반시계방향 → 안쪽으로 파고드는 concave
+          SVG를 카드 위(top: -R)에 겹쳐서 그림 → 카드 내부는 pt-5만 사용, 여백 최소화
+          좌: Q0 0 R 0  → 볼록(convex) — 흰 영역이 좌상단으로 솟음
+          우: A R R 0 0 0 390 R → 오목(concave) — 배경이 우상단에서 파고듦
+              sweep=0(반시계방향)이 concave
         */}
         <svg
           className="absolute left-0 w-full pointer-events-none"
-          style={{ top: 0, height: CURVE_H }}
-          viewBox={`0 0 390 ${CURVE_H}`}
+          style={{ top: -R, height: R }}
+          viewBox={`0 0 390 ${R}`}
           preserveAspectRatio="none"
           fill="white"
         >
-          <path d={`M0 ${CURVE_H} Q0 0 ${CURVE_H} 0 L${390 - CURVE_H} 0 A${CURVE_H} ${CURVE_H} 0 0 0 390 ${CURVE_H} Z`} />
+          <path d={`M0 ${R} Q0 0 ${R} 0 L${390 - R} 0 A${R} ${R} 0 0 0 390 ${R} Z`} />
         </svg>
 
         {/* 닷 인디케이터 */}
-        <div className="flex justify-center gap-2 mb-6">
+        <div className="flex justify-center gap-2 mb-5">
           {SLIDES.map((_, i) => (
             <button
               key={i}
@@ -149,7 +142,7 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
         </div>
 
         {/* 제목 */}
-        <h2 className="text-[22px] font-black text-[#1A1A1A] text-center mb-3 leading-snug whitespace-pre-line">
+        <h2 className="text-[22px] font-black text-[#1A1A1A] text-center mb-2 leading-snug whitespace-pre-line">
           {slide.title}
         </h2>
 
@@ -158,8 +151,8 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
           {slide.desc}
         </p>
 
-        {/* 버튼 영역 — 고정 높이로 슬라이드 전환 시 레이아웃 안 밀림 */}
-        <div className="mt-6" style={{ minHeight: 112 }}>
+        {/* 버튼 영역 — minHeight 고정으로 슬라이드 전환 시 카드 높이 불변 */}
+        <div className="mt-5" style={{ minHeight: 110 }}>
           {isLast ? (
             <>
               <button
