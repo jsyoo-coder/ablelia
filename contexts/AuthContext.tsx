@@ -137,11 +137,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function updatePreferences(preferences: string[], brands: string[] = []) {
     if (!user) return;
+    // 로컬 상태 먼저 업데이트 (메인 페이지 리다이렉트 방지)
+    setProfile((prev) => (prev ? { ...prev, preferences, brands, onboardingComplete: true } : prev));
     const { getFirestore, doc, setDoc } = await import("firebase/firestore");
     const db = getFirestore(app);
     const ref = doc(db, "users", user.uid);
     await setDoc(ref, { preferences, brands, onboardingComplete: true }, { merge: true });
-    setProfile((prev) => (prev ? { ...prev, preferences, brands, onboardingComplete: true } : prev));
   }
 
   return (
