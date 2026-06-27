@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 
 interface OnboardingProps {
   onLogin: () => Promise<void>;
@@ -14,11 +15,17 @@ const SLIDES = [
   { title: "로그인하고\n내 스타일 저장", desc: "취향에 맞는 상품 추천과\n찜 목록을 언제나 확인하세요" },
 ];
 
-const R = 80; // 코너 반지름
+const R = 80;
 
 export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingProps) {
   const [step, setStep] = useState(0);
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
   const touchStartX = useRef(0);
+
+  useEffect(() => {
+    // #phone-inner에 포탈 → status bar까지 덮음. 없으면 body 사용 (모바일)
+    setPortalTarget(document.getElementById("phone-inner") ?? document.body);
+  }, []);
 
   // 온보딩 표시 중 배경 스크롤 전면 차단
   useEffect(() => {
@@ -31,6 +38,7 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
     targets.forEach(el => { el.style.overflow = "hidden"; });
     return () => { targets.forEach((el, i) => { el.style.overflow = prevs[i]; }); };
   }, []);
+
   const { title, desc } = SLIDES[step];
   const isLast = step === SLIDES.length - 1;
 
@@ -43,9 +51,11 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
     else if (dx < -50 && step > 0) setStep(s => s - 1);
   }
 
-  return (
+  if (!portalTarget) return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex flex-col"
+      className="absolute inset-0 z-50 flex flex-col"
       style={{ background: "#000" }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
@@ -70,14 +80,13 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
           paddingBottom: "max(env(safe-area-inset-bottom, 0px), 12px)",
         }}
       >
-        {/* 우측 상단에만 오목 SVG (R×R) — 좌측 상단 라운드는 CSS border-radius 처리 */}
+        {/* 우측 상단 오목 SVG */}
         <svg
           className="absolute right-0 pointer-events-none"
           style={{ top: -R, height: R, width: R }}
           viewBox={`0 0 ${R} ${R}`}
           fill="white"
         >
-          {/* sweep=0 → center(0,0) → arc가 중심쪽으로 오목, 녹색 대면적/흰색 소면적 */}
           <path d={`M0 ${R} A${R} ${R} 0 0 0 ${R} 0 L${R} ${R} Z`} />
         </svg>
 
@@ -97,12 +106,9 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
           ))}
         </div>
 
-        {/* 제목 */}
         <h2 className="text-[22px] font-black text-[#1A1A1A] text-center mb-2 leading-snug whitespace-pre-line">
           {title}
         </h2>
-
-        {/* 설명 */}
         <p className="text-[13px] text-gray-400 text-center leading-relaxed whitespace-pre-line">
           {desc}
         </p>
@@ -137,6 +143,7 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    portalTarget
   );
 }
