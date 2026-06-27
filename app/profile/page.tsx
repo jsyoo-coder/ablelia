@@ -5,18 +5,18 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
 const STYLES = [
-  { id: "minimal", label: "미니멀", emoji: "🤍" },
-  { id: "street", label: "스트릿", emoji: "🔥" },
-  { id: "casual", label: "캐주얼", emoji: "👟" },
-  { id: "formal", label: "포멀", emoji: "🖤" },
-  { id: "vintage", label: "빈티지", emoji: "🪄" },
-  { id: "sporty", label: "스포티", emoji: "⚡" },
-  { id: "feminine", label: "페미닌", emoji: "🌸" },
-  { id: "outdoor", label: "아웃도어", emoji: "🏔️" },
-  { id: "luxury", label: "럭셔리", emoji: "💎" },
-  { id: "y2k", label: "Y2K", emoji: "✨" },
-  { id: "amekaji", label: "아메카지", emoji: "🧥" },
-  { id: "preppy", label: "프레피", emoji: "🎓" },
+  { id: "minimal",  label: "미니멀",  q: "미니멀 베이직 패션" },
+  { id: "street",   label: "스트릿",  q: "스트릿 그래픽 오버핏" },
+  { id: "casual",   label: "캐주얼",  q: "캐주얼 데일리 룩" },
+  { id: "formal",   label: "포멀",    q: "슬랙스 블레이저 포멀" },
+  { id: "vintage",  label: "빈티지",  q: "빈티지 레트로 데님" },
+  { id: "sporty",   label: "스포티",  q: "스포티 트레이닝 애슬레저" },
+  { id: "feminine", label: "페미닌",  q: "플로럴 원피스 페미닌" },
+  { id: "outdoor",  label: "아웃도어", q: "아웃도어 고어텍스" },
+  { id: "luxury",   label: "럭셔리",  q: "하이엔드 럭셔리 패션" },
+  { id: "y2k",      label: "Y2K",     q: "Y2K 로우라이즈" },
+  { id: "amekaji",  label: "아메카지", q: "아메카지 워크웨어" },
+  { id: "preppy",   label: "프레피",  q: "프레피 컬리지룩" },
 ];
 
 export default function ProfilePage() {
@@ -25,12 +25,33 @@ export default function ProfilePage() {
   const [selected, setSelected] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [images, setImages] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (loading) return;
     if (!user || !profile) { router.push("/"); return; }
     setSelected(profile.preferences ?? []);
   }, [loading, user, profile]);
+
+  useEffect(() => {
+    async function loadImages() {
+      const entries = await Promise.allSettled(
+        STYLES.map(async (s) => {
+          const res = await fetch(`/api/search?q=${encodeURIComponent(s.q)}&display=5`);
+          const data = await res.json();
+          const items: { image?: string }[] = data.items ?? [];
+          const img = items.find(i => i.image)?.image ?? "";
+          return { id: s.id, img };
+        })
+      );
+      const map: Record<string, string> = {};
+      entries.forEach(r => {
+        if (r.status === "fulfilled" && r.value.img) map[r.value.id] = r.value.img;
+      });
+      setImages(map);
+    }
+    loadImages();
+  }, []);
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: "#F7F0E6" }}>
@@ -47,10 +68,15 @@ export default function ProfilePage() {
   async function handleSave() {
     if (selected.length < 3) return;
     setSaving(true);
-    await updatePreferences(selected);
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => router.push("/"), 800);
+    try {
+      await updatePreferences(selected);
+      setSaved(true);
+      setTimeout(() => router.push("/"), 800);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function handleLogout() {
@@ -76,43 +102,61 @@ export default function ProfilePage() {
       </header>
 
       <div className="max-w-md mx-auto px-5">
-        {/* Avatar card */}
-        <div className="bg-white rounded-3xl p-6 flex items-center gap-4 mb-6 shadow-sm">
+        {/* 유저 카드 */}
+        <div className="bg-white rounded-3xl p-4 flex items-center gap-3 mb-6 shadow-sm">
           {profile.photoURL ? (
-            <img src={profile.photoURL} alt="" className="w-16 h-16 rounded-full" referrerPolicy="no-referrer" />
+            <img src={profile.photoURL} alt="" className="w-14 h-14 rounded-full shrink-0" referrerPolicy="no-referrer" />
           ) : (
-            <div className="w-16 h-16 rounded-full bg-[#FF5C1A] flex items-center justify-center text-white text-xl font-black">
+            <div className="w-14 h-14 rounded-full bg-[#FF5C1A] flex items-center justify-center text-white text-xl font-black shrink-0">
               {profile.displayName?.[0]}
             </div>
           )}
-          <div>
-            <p className="font-bold text-[#1A1A1A]">{profile.displayName}</p>
-            <p className="text-xs text-gray-400 mt-0.5">{profile.email}</p>
+          <div className="min-w-0">
+            <p className="font-bold text-[#1A1A1A] truncate">{profile.displayName}</p>
+            <p className="text-xs text-gray-400 mt-0.5 truncate">{profile.email}</p>
             <p className="text-xs text-[#FF5C1A] font-semibold mt-1">{selected.length}개 스타일 선택됨</p>
           </div>
         </div>
 
-        {/* Style section */}
-        <p className="text-[10px] font-black tracking-widest text-[#FF5C1A] uppercase mb-3">
-          CATEGORIES
-        </p>
+        <p className="text-[10px] font-black tracking-widest text-[#FF5C1A] uppercase mb-1">CATEGORIES</p>
         <p className="text-xs text-gray-400 mb-4">최소 3개 선택 · 홈 피드에 반영됩니다</p>
 
+        {/* 스타일 그리드 */}
         <div className="grid grid-cols-3 gap-2.5 mb-6">
           {STYLES.map((s) => {
             const on = selected.includes(s.id);
+            const img = images[s.id];
             return (
               <button
                 key={s.id}
                 onClick={() => toggle(s.id)}
-                className={`flex flex-col items-center gap-1.5 py-4 px-2 rounded-3xl transition-all ${
-                  on
-                    ? "bg-[#FF5C1A] text-white shadow-md scale-105"
-                    : "bg-white text-[#1A1A1A] shadow-sm hover:shadow-md"
+                className={`relative flex flex-col items-center justify-end overflow-hidden rounded-3xl transition-all aspect-square ${
+                  on ? "ring-3 ring-[#FF5C1A] scale-105 shadow-lg" : "shadow-sm hover:shadow-md"
                 }`}
               >
-                <span className="text-2xl">{s.emoji}</span>
-                <span className="text-xs font-bold">{s.label}</span>
+                {img ? (
+                  <img src={img} alt={s.label} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                ) : (
+                  <div className="absolute inset-0 bg-[#EDE6DA] animate-pulse" />
+                )}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: on
+                      ? "linear-gradient(to top, rgba(255,92,26,0.85) 0%, rgba(255,92,26,0.3) 50%, rgba(0,0,0,0.1) 100%)"
+                      : "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)",
+                  }}
+                />
+                {on && (
+                  <div className="absolute top-2 right-2 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow">
+                    <svg width="11" height="11" fill="none" stroke="#FF5C1A" strokeWidth="3" viewBox="0 0 24 24">
+                      <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                  </div>
+                )}
+                <div className="relative z-10 pb-2.5 px-1 text-center w-full">
+                  <p className="text-white text-xs font-black drop-shadow">{s.label}</p>
+                </div>
               </button>
             );
           })}
