@@ -124,7 +124,8 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
           preserveAspectRatio="none"
           fill="white"
         >
-          <path d="M0 80 Q0 0 80 0 L310 0 Q310 80 390 80 Z" />
+          {/* 좌: 볼록 Q(베지어), 우: 오목 A(정원 호) — sweep=1로 안쪽으로 파고드는 방향 */}
+          <path d="M0 80 Q0 0 80 0 L310 0 A80 80 0 0 1 390 80 Z" />
         </svg>
         {/* 닷 인디케이터 */}
         <div className="flex justify-center gap-2 mb-7">
