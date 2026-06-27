@@ -13,8 +13,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko" className={`${geist.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-white">
-        <ClientProviders>{children}</ClientProviders>
+      <body className="min-h-full" style={{ background: "#D9CEBF" }}>
+        <div
+          className="mx-auto relative min-h-screen overflow-x-hidden"
+          style={{ maxWidth: "390px", background: "#F7F0E6" }}
+        >
+          <ClientProviders>{children}</ClientProviders>
+        </div>
       </body>
     </html>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import ProductCard from "./components/ProductCard";
@@ -74,7 +74,7 @@ export default function Home() {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [signingIn, setSigningIn] = useState(false);
   const [searchSubmitted, setSearchSubmitted] = useState(false);
-  const [masoncols, setMasoncols] = useState(2);
+  const masoncols = 2;
   const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(null);
   const [popularProducts, setPopularProducts] = useState<(Product & { count: number })[]>([]);
   const currentQueryRef = useRef("");
@@ -116,16 +116,6 @@ export default function Home() {
     fetchPopular();
   }, []);
 
-  // 화면 너비에 따른 컬럼 수 (2/3/4)
-  useLayoutEffect(() => {
-    function update() {
-      const w = window.innerWidth;
-      setMasoncols(w >= 1024 ? 4 : w >= 640 ? 3 : 2);
-    }
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
 
   const fetchItems = useCallback(async (q: string, start = 1, append = false) => {
     if (start === 1) setFetching(true);

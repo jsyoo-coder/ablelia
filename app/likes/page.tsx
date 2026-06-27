@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useLayoutEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import ProductCard from "@/app/components/ProductCard";
@@ -24,17 +24,7 @@ export default function LikesPage() {
   const [fetching, setFetching] = useState(true);
   const [fetchError, setFetchError] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [masoncols, setMasoncols] = useState(2);
-
-  useLayoutEffect(() => {
-    function update() {
-      const w = window.innerWidth;
-      setMasoncols(w >= 1024 ? 4 : w >= 640 ? 3 : 2);
-    }
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
+  const masoncols = 2;
 
   useEffect(() => {
     if (loading) return;
