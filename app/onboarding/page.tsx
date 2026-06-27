@@ -91,7 +91,7 @@ export default function OnboardingPage() {
                 key={s.id}
                 onClick={() => toggle(s.id)}
                 className={`relative flex flex-col items-center justify-end overflow-hidden rounded-3xl transition-all aspect-square ${
-                  on ? "ring-3 ring-[#FF5C1A] scale-105 shadow-lg" : "shadow-sm hover:shadow-md"
+                  on ? "ring-[3px] ring-[#FF5C1A] shadow-lg z-10" : "shadow-sm hover:shadow-md"
                 }`}
                 style={{ minHeight: "100px" }}
               >
