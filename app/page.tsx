@@ -62,15 +62,14 @@ export default function Home() {
   const [tab, setTab] = useState<"feed" | "search">("feed");
   const [query, setQuery] = useState("");
   const [activeStyle, setActiveStyle] = useState<string | null>(null);
-  const [showDropdown, setShowDropdown] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [signingIn, setSigningIn] = useState(false);
+  const [searchSubmitted, setSearchSubmitted] = useState(false);
   const currentQueryRef = useRef("");
   const startRef = useRef(1);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const searchImgCacheRef = useRef<Record<string, string>>({});
   const [searchImgs, setSearchImgs] = useState<Record<string, string>>({});
 
@@ -164,9 +163,9 @@ export default function Home() {
   }, [tab, loading, prefsKey]);
 
 
-  // 드롭다운 열릴 때 검색어별 썸네일 로드 (캐시)
+  // 검색 홈 열릴 때 검색어별 썸네일 로드 (캐시)
   useEffect(() => {
-    if (!showDropdown) return;
+    if (tab !== "search" || searchSubmitted) return;
     const targets = [...new Set([...SUGGESTIONS.slice(0, 10), ...recentSearches])];
     const toLoad = targets.filter(s => !searchImgCacheRef.current[s]);
     if (!toLoad.length) return;
@@ -185,17 +184,11 @@ export default function Home() {
       setSearchImgs({ ...searchImgCacheRef.current });
     })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showDropdown]);
+  }, [tab, searchSubmitted]);
 
-  // 드롭다운 외부 클릭 닫기
+  // 프로필 메뉴 외부 클릭 닫기
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (
-        dropdownRef.current && !dropdownRef.current.contains(e.target as Node) &&
-        inputRef.current && !inputRef.current.contains(e.target as Node)
-      ) {
-        setShowDropdown(false);
-      }
       if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
         setShowProfileMenu(false);
       }
@@ -210,7 +203,7 @@ export default function Home() {
     setRecentSearches(updated);
     saveRecent(updated);
     setQuery(q);
-    setShowDropdown(false);
+    setSearchSubmitted(true);
     setTab("search");
     setActiveStyle(null);
     fetchItems(q, 1, false);
@@ -233,7 +226,9 @@ export default function Home() {
 
   function openSearch() {
     setTab("search");
-    setShowDropdown(true);
+    setSearchSubmitted(false);
+    setQuery("");
+    setItems([]);
     setTimeout(() => inputRef.current?.focus(), 50);
   }
 
@@ -259,7 +254,10 @@ export default function Home() {
           {tab === "search" ? (
             <div className="flex items-center gap-2 w-full">
               <button
-                onClick={() => { setTab("feed"); setQuery(""); setShowDropdown(false); }}
+                onClick={() => {
+                  if (searchSubmitted) { setSearchSubmitted(false); setQuery(""); setItems([]); }
+                  else { setTab("feed"); setQuery(""); }
+                }}
                 className="text-gray-500 hover:text-[#FF3D7F] transition-colors shrink-0">
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                   <path d="M19 12H5M12 5l-7 7 7 7"/>
@@ -272,14 +270,13 @@ export default function Home() {
                 <input
                   ref={inputRef}
                   value={query}
-                  onChange={e => { setQuery(e.target.value); setShowDropdown(true); }}
-                  onFocus={() => setShowDropdown(true)}
+                  onChange={e => { setQuery(e.target.value); if (searchSubmitted) setSearchSubmitted(false); }}
                   onKeyDown={e => e.key === "Enter" && submitSearch(query)}
                   placeholder="패션 아이템 검색..."
                   className="flex-1 text-sm outline-none bg-transparent"
                 />
                 {query && (
-                  <button onClick={() => { setQuery(""); setShowDropdown(true); inputRef.current?.focus(); }}
+                  <button onClick={() => { setQuery(""); setSearchSubmitted(false); setItems([]); inputRef.current?.focus(); }}
                     className="text-gray-300 hover:text-gray-500 transition-colors">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                       <path d="M18 6L6 18M6 6l12 12"/>
@@ -423,144 +420,157 @@ export default function Home() {
         )}
       </header>
 
-      {/* 검색 드롭다운 */}
-      {tab === "search" && showDropdown && (
-        <div
-          ref={dropdownRef}
-          className="fixed left-0 right-0 z-10 px-4 pt-2"
-          style={{ top: "72px" }}>
-          <div className="bg-white rounded-3xl shadow-xl max-w-screen-xl mx-auto overflow-hidden max-h-[70vh] overflow-y-auto">
-
-            {/* 최근 검색 */}
-            {recentSearches.length > 0 && !query.trim() && (
-              <>
-                <div className="flex items-center justify-between px-4 pt-4 pb-1">
-                  <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase">최근 검색</p>
-                  <button onClick={() => { setRecentSearches([]); saveRecent([]); }}
-                    className="text-[10px] text-gray-400 hover:text-gray-600">전체 삭제</button>
+      {tab === "feed" ? (
+        /* ── 피드 ── */
+        <div className="px-3 pt-4 max-w-screen-xl mx-auto">
+          {!fetching && items.length > 0 && (
+            <div className="mb-3">
+              <h2 className="text-xs font-black tracking-widest text-[#FF3D7F] uppercase">
+                {activeStyle ? STYLE_LABELS[activeStyle] : "NEW ITEMS"}
+              </h2>
+            </div>
+          )}
+          {fetching ? (
+            <div className="flex gap-3">
+              {[0, 1].map(col => (
+                <div key={col} className="flex-1 flex flex-col min-w-0">
+                  {Array.from({ length: 6 }).map((_, i) => {
+                    const idx = col + i * 2;
+                    return (
+                      <div key={idx} className="mb-3 rounded-3xl bg-white animate-pulse shadow-sm overflow-hidden">
+                        <div className="rounded-3xl m-2" style={{ height: `${160 + (idx % 4) * 50}px`, background: "#EDE6DA" }} />
+                        <div className="px-3 py-2.5 space-y-1.5">
+                          <div className="h-2 bg-gray-100 rounded-full w-16" />
+                          <div className="h-3 bg-gray-100 rounded-full w-full" />
+                          <div className="h-3 bg-gray-100 rounded-full w-3/4" />
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex gap-3">
+              {[0, 1].map(col => (
+                <div key={col} className="flex-1 flex flex-col min-w-0">
+                  {items.map((item, i) => ({ item, i })).filter(({ i }) => i % 2 === col).map(({ item, i }) => (
+                    <ProductCard key={`${item.link}-${i}`} product={item} isNew={i < 6} />
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+          <div ref={sentinelRef} className="h-12 flex items-center justify-center mt-2">
+            {loadingMore && <div className="w-5 h-5 border-2 border-[#EDE6DA] border-t-[#FF3D7F] rounded-full animate-spin" />}
+          </div>
+        </div>
+      ) : !searchSubmitted ? (
+        /* ── 검색 홈: 최근·추천 그리드 ── */
+        <div className="px-4 pt-5 pb-10 max-w-screen-xl mx-auto">
+          {recentSearches.length > 0 && !query.trim() && (
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-sm font-black text-[#1A1A1A]">최근 검색 기록</h2>
+                <button onClick={() => { setRecentSearches([]); saveRecent([]); }}
+                  className="text-xs text-gray-400 hover:text-gray-600">전체 삭제</button>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
                 {recentSearches.map(r => (
                   <button key={r} onClick={() => submitSearch(r)}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#F7F0E6] transition-colors text-left">
-                    <div className="w-11 h-11 rounded-2xl overflow-hidden shrink-0 bg-[#EDE6DA]">
+                    className="flex items-center gap-3 bg-white rounded-2xl p-2.5 shadow-sm hover:shadow-md transition-shadow text-left">
+                    <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-[#EDE6DA]">
                       {searchImgs[r]
                         ? <img src={searchImgs[r]} alt="" className="w-full h-full object-cover" />
                         : <div className="w-full h-full animate-pulse bg-[#EDE6DA]" />}
                     </div>
-                    <span className="flex-1 text-sm font-medium text-[#1A1A1A]">{r}</span>
-                    <button onClick={(e) => removeRecent(r, e)}
-                      className="p-1 text-gray-300 hover:text-gray-500 shrink-0">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                    <span className="flex-1 text-xs font-semibold text-[#1A1A1A] leading-tight line-clamp-2 min-w-0">{r}</span>
+                    <button onClick={(e) => removeRecent(r, e)} className="p-1 text-gray-300 hover:text-gray-500 shrink-0">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                         <path d="M18 6L6 18M6 6l12 12"/>
                       </svg>
                     </button>
                   </button>
                 ))}
-                <div className="mx-4 border-t border-gray-100 my-1" />
-              </>
-            )}
-
-            {/* 추천/검색 제안 */}
-            <div className="flex items-center px-4 pt-3 pb-1">
-              <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase">
-                {query.trim() ? "검색 제안" : "추천 검색어"}
-              </p>
+              </div>
             </div>
+          )}
+
+          <div>
+            <h2 className="text-sm font-black text-[#1A1A1A] mb-3">
+              {query.trim() ? "검색 제안" : "추천 아이디어"}
+            </h2>
             {filteredSuggestions.length > 0 ? (
-              <>
+              <div className="grid grid-cols-2 gap-2">
                 {filteredSuggestions.map(s => (
                   <button key={s} onClick={() => submitSearch(s)}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#F7F0E6] transition-colors text-left">
-                    <div className="w-11 h-11 rounded-2xl overflow-hidden shrink-0 bg-[#EDE6DA]">
+                    className="flex items-center gap-3 bg-white rounded-2xl p-2.5 shadow-sm hover:shadow-md transition-shadow text-left">
+                    <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-[#EDE6DA]">
                       {searchImgs[s]
                         ? <img src={searchImgs[s]} alt="" className="w-full h-full object-cover" />
                         : <div className="w-full h-full animate-pulse bg-[#EDE6DA]" />}
                     </div>
-                    <span className="flex-1 text-sm font-medium text-[#1A1A1A]">
+                    <span className="flex-1 text-xs font-semibold text-[#1A1A1A] leading-tight line-clamp-2 min-w-0">
                       {query.trim()
                         ? s.split(query).flatMap((part, i) =>
                             i === 0 ? [part] : [<strong key={i} className="text-[#FF3D7F]">{query}</strong>, part]
                           )
                         : s}
                     </span>
-                    <svg width="14" height="14" fill="none" stroke="#CCC" strokeWidth="2" viewBox="0 0 24 24">
-                      <path d="M7 17L17 7M7 7h10v10"/>
-                    </svg>
                   </button>
                 ))}
-              </>
+              </div>
             ) : (
-              <p className="text-xs text-gray-400 px-4 pb-3 pt-1">
+              <p className="text-sm text-gray-400 mt-2">
                 &ldquo;{query}&rdquo; — Enter 키로 검색
               </p>
             )}
-            <div className="h-3" />
           </div>
         </div>
-      )}
-
-      {/* 배경 딤 (드롭다운 오픈 시) */}
-      {tab === "search" && showDropdown && (
-        <div
-          className="fixed inset-0 z-0"
-          style={{ background: "rgba(0,0,0,0.08)", top: "72px" }}
-          onClick={() => setShowDropdown(false)}
-        />
-      )}
-
-      {/* Feed */}
-      <div className="px-3 pt-4 max-w-screen-xl mx-auto relative z-0">
-        {!fetching && items.length > 0 && (
-          <div className="mb-3">
-            <h2 className="text-xs font-black tracking-widest text-[#FF3D7F] uppercase">
-              {tab === "search" ? "검색 결과" : (activeStyle ? STYLE_LABELS[activeStyle] : "NEW ITEMS")}
-            </h2>
-          </div>
-        )}
-
-        {fetching ? (
-          <div className="flex gap-3">
-            {[0, 1].map(col => (
-              <div key={col} className="flex-1 flex flex-col min-w-0">
-                {Array.from({ length: 6 }).map((_, i) => {
-                  const idx = col + i * 2;
-                  return (
-                    <div key={idx} className="mb-3 rounded-3xl bg-white animate-pulse shadow-sm overflow-hidden">
-                      <div className="rounded-3xl m-2" style={{ height: `${160 + (idx % 4) * 50}px`, background: "#EDE6DA" }} />
-                      <div className="px-3 py-2.5 space-y-1.5">
-                        <div className="h-2 bg-gray-100 rounded-full w-16" />
-                        <div className="h-3 bg-gray-100 rounded-full w-full" />
-                        <div className="h-3 bg-gray-100 rounded-full w-3/4" />
+      ) : (
+        /* ── 검색 결과 ── */
+        <div className="px-3 pt-4 max-w-screen-xl mx-auto">
+          {!fetching && items.length > 0 && (
+            <div className="mb-3">
+              <h2 className="text-xs font-black tracking-widest text-[#FF3D7F] uppercase">검색 결과</h2>
+            </div>
+          )}
+          {fetching ? (
+            <div className="flex gap-3">
+              {[0, 1].map(col => (
+                <div key={col} className="flex-1 flex flex-col min-w-0">
+                  {Array.from({ length: 6 }).map((_, i) => {
+                    const idx = col + i * 2;
+                    return (
+                      <div key={idx} className="mb-3 rounded-3xl bg-white animate-pulse shadow-sm overflow-hidden">
+                        <div className="rounded-3xl m-2" style={{ height: `${160 + (idx % 4) * 50}px`, background: "#EDE6DA" }} />
+                        <div className="px-3 py-2.5 space-y-1.5">
+                          <div className="h-2 bg-gray-100 rounded-full w-16" />
+                          <div className="h-3 bg-gray-100 rounded-full w-full" />
+                          <div className="h-3 bg-gray-100 rounded-full w-3/4" />
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="flex gap-3">
-            {[0, 1].map(col => (
-              <div key={col} className="flex-1 flex flex-col min-w-0">
-                {items
-                  .map((item, i) => ({ item, i }))
-                  .filter(({ i }) => i % 2 === col)
-                  .map(({ item, i }) => (
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex gap-3">
+              {[0, 1].map(col => (
+                <div key={col} className="flex-1 flex flex-col min-w-0">
+                  {items.map((item, i) => ({ item, i })).filter(({ i }) => i % 2 === col).map(({ item, i }) => (
                     <ProductCard key={`${item.link}-${i}`} product={item} isNew={i < 6} />
                   ))}
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div ref={sentinelRef} className="h-12 flex items-center justify-center mt-2">
-          {loadingMore && (
-            <div className="w-5 h-5 border-2 border-[#EDE6DA] border-t-[#FF3D7F] rounded-full animate-spin" />
+                </div>
+              ))}
+            </div>
           )}
+          <div ref={sentinelRef} className="h-12 flex items-center justify-center mt-2">
+            {loadingMore && <div className="w-5 h-5 border-2 border-[#EDE6DA] border-t-[#FF3D7F] rounded-full animate-spin" />}
+          </div>
         </div>
-      </div>
-
-      {/* Bottom Nav */}
+      )}
     </div>
   );
 }
