@@ -9,9 +9,9 @@ export type Product = {
 };
 
 export default function ProductCard({
-  product, isNew, onSelect,
+  product, isNew, likeCount, onSelect,
 }: {
-  product: Product; isNew?: boolean; onSelect?: (p: Product) => void;
+  product: Product; isNew?: boolean; likeCount?: number; onSelect?: (p: Product) => void;
 }) {
   const title = product.title.replace(/<[^>]+>/g, "");
   const price = product.lprice ? Number(product.lprice).toLocaleString() : null;
@@ -39,6 +39,12 @@ export default function ProductCard({
               NEW IN
             </div>
           )}
+          {likeCount && likeCount > 0 ? (
+            <div className="absolute top-2 right-2 flex items-center gap-1 bg-white/90 text-[#FF3D7F] text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="#FF3D7F"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              {likeCount}
+            </div>
+          ) : null}
         </div>
         <div className="px-3 py-2.5">
           {label && (

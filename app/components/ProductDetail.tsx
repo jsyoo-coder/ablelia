@@ -15,6 +15,15 @@ function saveLikes(list: string[]) {
   localStorage.setItem(LIKES_KEY, JSON.stringify(list));
 }
 
+function productDocId(link: string): string {
+  let h = 5381;
+  for (let i = 0; i < link.length; i++) {
+    h = ((h << 5) + h) ^ link.charCodeAt(i);
+    h = h >>> 0;
+  }
+  return h.toString(36);
+}
+
 function buildSimilarQuery(product: Product): string {
   const clean = product.title.replace(/<[^>]+>/g, "").trim();
   const words = clean.split(/\s+/);
@@ -90,11 +99,34 @@ export default function ProductDetail({
       .catch(() => setLoadingSimilar(false));
   }, [product.link]);
 
-  function toggleLike() {
+  async function toggleLike() {
+    const nowLiked = !liked;
     const current = getLikes();
     const updated = liked ? current.filter(l => l !== product.link) : [...current, product.link];
     saveLikes(updated);
-    setLiked(!liked);
+    setLiked(nowLiked);
+
+    // 로그인 상태일 때 Firestore 전체 좋아요 카운트 동기화
+    if (user) {
+      try {
+        const { getFirestore, doc, setDoc, increment } = await import("firebase/firestore");
+        const { app } = await import("@/lib/firebase");
+        const db = getFirestore(app);
+        const ref = doc(db, "product_likes", productDocId(product.link));
+        await setDoc(ref, {
+          link: product.link,
+          title: product.title,
+          image: product.image,
+          lprice: product.lprice,
+          brand: product.brand,
+          mallName: product.mallName,
+          category2: product.category2,
+          count: increment(nowLiked ? 1 : -1),
+        }, { merge: true });
+      } catch (e) {
+        console.error("좋아요 동기화 실패:", e);
+      }
+    }
   }
 
   const headerBg = { background: "rgba(247,240,230,0.97)", backdropFilter: "blur(12px)", zIndex: 20 } as React.CSSProperties;

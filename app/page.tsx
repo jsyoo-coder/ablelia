@@ -76,6 +76,7 @@ export default function Home() {
   const [searchSubmitted, setSearchSubmitted] = useState(false);
   const [masoncols, setMasoncols] = useState(2);
   const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(null);
+  const [popularProducts, setPopularProducts] = useState<(Product & { count: number })[]>([]);
   const currentQueryRef = useRef("");
   const startRef = useRef(1);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -95,6 +96,24 @@ export default function Home() {
       try { setSelectedProduct(JSON.parse(saved)); } catch {}
       sessionStorage.removeItem("ablelia_detail_product");
     }
+  }, []);
+
+  // 하트 많이 받은 인기 상품 fetch (피드 상단 노출)
+  useEffect(() => {
+    async function fetchPopular() {
+      try {
+        const { getFirestore, collection, query, orderBy, limit, getDocs } = await import("firebase/firestore");
+        const { app } = await import("@/lib/firebase");
+        const db = getFirestore(app);
+        const q = query(collection(db, "product_likes"), orderBy("count", "desc"), limit(20));
+        const snap = await getDocs(q);
+        const list = snap.docs
+          .map(d => d.data() as Product & { count: number })
+          .filter(p => p.count > 0 && p.link && p.image);
+        setPopularProducts(list);
+      } catch {}
+    }
+    fetchPopular();
   }, []);
 
   // 화면 너비에 따른 컬럼 수 (2/3/4)
@@ -486,7 +505,7 @@ export default function Home() {
       {tab === "feed" ? (
         /* ── 피드 ── */
         <div className="px-3 pt-4 max-w-screen-xl mx-auto">
-          {!fetching && items.length > 0 && (
+          {!fetching && (items.length > 0 || popularProducts.length > 0) && (
             <div className="mb-3">
               <h2 className="text-xs font-black tracking-widest text-[#FF3D7F] uppercase">
                 {activeStyle ? STYLE_LABELS[activeStyle] : "NEW ITEMS"}
@@ -515,13 +534,28 @@ export default function Home() {
             </div>
           ) : (
             <div className="flex gap-3">
-              {Array.from({ length: masoncols }, (_, col) => col).map(col => (
-                <div key={col} className="flex-1 flex flex-col min-w-0">
-                  {items.map((item, i) => ({ item, i })).filter(({ i }) => i % masoncols === col).map(({ item, i }) => (
-                    <ProductCard key={`${item.link}-${i}`} product={item} isNew={i < 6} onSelect={setSelectedProduct} />
-                  ))}
-                </div>
-              ))}
+              {(() => {
+                // 인기 상품 상단 노출 + 피드와 중복 제거
+                const popularLinks = new Set(popularProducts.map(p => p.link));
+                const feedItems = items.filter(item => !popularLinks.has(item.link));
+                const allItems: (Product & { count?: number })[] = [...popularProducts, ...feedItems];
+                return Array.from({ length: masoncols }, (_, col) => col).map(col => (
+                  <div key={col} className="flex-1 flex flex-col min-w-0">
+                    {allItems
+                      .map((item, i) => ({ item, i }))
+                      .filter(({ i }) => i % masoncols === col)
+                      .map(({ item, i }) => (
+                        <ProductCard
+                          key={`${item.link}-${i}`}
+                          product={item}
+                          isNew={!item.count && i < 6}
+                          likeCount={item.count}
+                          onSelect={setSelectedProduct}
+                        />
+                      ))}
+                  </div>
+                ));
+              })()}
             </div>
           )}
           <div ref={sentinelRef} className="h-12 flex items-center justify-center mt-2">
