@@ -118,7 +118,9 @@ export default function Home() {
   ].join(",");
 
   function buildQuery(base: string): string {
-    const g = profile?.gender ?? "";
+    const g = profile?.gender === "여성" ? "여성의류"
+            : profile?.gender === "남성" ? "남성의류"
+            : "";
     const a = (profile?.ageGroup ?? "").replace(" 이상", "");
     return [a, g, base].filter(Boolean).join(" ");
   }
