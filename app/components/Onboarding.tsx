@@ -113,19 +113,20 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
       <div
         className="relative bg-white px-6 pt-8 shrink-0"
         style={{
-          borderRadius: "0 44px 0 0",
           paddingBottom: "max(env(safe-area-inset-bottom, 0px), 28px)",
         }}
       >
-        {/* 왼쪽 상단 오목 코너: radial-gradient로 배경색이 파고드는 효과 */}
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            top: -44, left: 0,
-            width: 44, height: 44,
-            background: "radial-gradient(circle at 100% 100%, transparent 71%, white 71%)",
-          }}
-        />
+        {/* 좌(오목)·우(볼록) 비대칭 상단 곡선 — SVG로 직접 그림 */}
+        <svg
+          className="absolute left-0 w-full pointer-events-none"
+          style={{ top: -52, height: 52 }}
+          viewBox="0 0 390 52"
+          preserveAspectRatio="none"
+          fill="white"
+        >
+          {/* 좌: Q 52 52 → 오목(배경이 파고드는 느낌), 우: Q 390 0 → 볼록 */}
+          <path d="M0 52 Q52 52 52 0 L338 0 Q390 0 390 52 Z" />
+        </svg>
         {/* 닷 인디케이터 */}
         <div className="flex justify-center gap-2 mb-7">
           {SLIDES.map((_, i) => (
