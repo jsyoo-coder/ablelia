@@ -43,30 +43,16 @@ const BRANDS = [
   { id: "other",           label: "기타",            logo: "",                                               q: "" },
 ];
 
-function BrandCard({ id, label, logo, on, onClick }: {
-  id: string; label: string; logo: string; on: boolean; onClick: () => void;
+function BrandCard({ id, label, on, onClick }: {
+  id: string; label: string; on: boolean; onClick: () => void;
 }) {
-  const [imgErr, setImgErr] = useState(false);
-  const isOther = id === "other";
+  const fontSize = label.length <= 4 ? "text-sm" : label.length <= 9 ? "text-xs" : "text-[9px]";
   return (
     <button onClick={onClick}
-      className={`relative flex flex-col items-center justify-center gap-1.5 rounded-2xl aspect-square transition-all p-2 ${
+      className={`relative flex items-center justify-center rounded-2xl aspect-square transition-all p-2 ${
         on ? "bg-[#FFF0EA] ring-[2.5px] ring-[#FF5C1A] shadow-md z-10" : "bg-white shadow-sm hover:shadow-md"
       }`}>
-      {isOther ? (
-        <div className={`w-9 h-9 rounded-full flex items-center justify-center ${on ? "bg-[#FF5C1A]" : "bg-[#F0EBE3]"}`}>
-          <svg width="18" height="18" fill="none" stroke={on ? "white" : "#999"} strokeWidth="2" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
-          </svg>
-        </div>
-      ) : logo && !imgErr ? (
-        <img src={logo} alt={label} className="w-9 h-9 object-contain" onError={() => setImgErr(true)} />
-      ) : (
-        <div className="w-9 h-9 flex items-center justify-center">
-          <span className="text-[9px] font-black text-gray-400 text-center leading-tight">{label.slice(0, 6)}</span>
-        </div>
-      )}
-      <p className={`text-[9px] font-bold text-center leading-tight line-clamp-1 w-full px-0.5 ${on ? "text-[#FF5C1A]" : "text-[#555]"}`}>
+      <p className={`${fontSize} font-black text-center leading-tight ${on ? "text-[#FF5C1A]" : "text-[#1A1A1A]"}`}>
         {label}
       </p>
       {on && (
@@ -187,7 +173,7 @@ export default function ProfilePage() {
         <p className="text-xs text-gray-400 mb-3">선호 브랜드 선택 (선택사항)</p>
         <div className="grid grid-cols-4 gap-2 mb-6">
           {BRANDS.map(b => (
-            <BrandCard key={b.id} id={b.id} label={b.label} logo={b.logo}
+            <BrandCard key={b.id} id={b.id} label={b.label}
               on={selectedBrands.includes(b.id)} onClick={() => toggleBrand(b.id)} />
           ))}
         </div>
