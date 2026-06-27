@@ -4,8 +4,10 @@ export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get("q");
   if (!query) return NextResponse.json({ items: [] });
 
+  const start = Math.min(Number(request.nextUrl.searchParams.get("start") ?? "1"), 961);
+
   const res = await fetch(
-    `https://openapi.naver.com/v1/search/shop.json?query=${encodeURIComponent(query)}&display=40&sort=sim`,
+    `https://openapi.naver.com/v1/search/shop.json?query=${encodeURIComponent(query)}&display=40&start=${start}&sort=sim`,
     {
       headers: {
         "X-Naver-Client-Id": process.env.NAVER_CLIENT_ID!,
