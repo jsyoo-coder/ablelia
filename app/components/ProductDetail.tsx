@@ -140,13 +140,18 @@ export default function ProductDetail({
 
         {/* 좌측: 이미지 + 상품정보 + 구매버튼 (스크롤) */}
         <div className="w-[52%] min-h-0 overflow-y-auto p-6 flex flex-col gap-5">
-          {/* 이미지 — shrink-0으로 flex 압축 방지, 세로 긴 이미지도 짤리지 않게 object-contain */}
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm shrink-0">
+          {/* 이미지 — 높이 제한으로 하단 버튼 영역 확보, 가로값 auto로 여백 제거 */}
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm shrink-0 flex justify-center">
             {product.image && (
               <img
                 src={product.image} alt={title}
-                className="w-full block object-contain"
-                style={{ maxHeight: "calc(100vh - 180px)" }}
+                className="block"
+                style={{
+                  height: "auto",
+                  maxHeight: "calc(100vh - 360px)",
+                  width: "auto",
+                  maxWidth: "100%",
+                }}
               />
             )}
           </div>
