@@ -63,7 +63,7 @@ export default function ProfilePage() {
   }
 
   async function handleSave() {
-    if (selected.length < 3) return;
+    if (selected.length < 1) return;
     setSaving(true);
     try {
       await updatePreferences(selected, []);
@@ -114,7 +114,7 @@ export default function ProfilePage() {
         </div>
 
         <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase mb-1">CATEGORIES</p>
-        <p className="text-xs text-gray-400 mb-3">최소 3개 선택 · 홈 피드에 반영됩니다</p>
+        <p className="text-xs text-gray-400 mb-3">홈 피드에 반영됩니다</p>
         <div className="grid grid-cols-3 gap-2.5 mb-6">
           {STYLES.map(s => {
             const on = selected.includes(s.id);
@@ -138,9 +138,9 @@ export default function ProfilePage() {
           })}
         </div>
 
-        <button onClick={handleSave} disabled={selected.length < 3 || saving}
+        <button onClick={handleSave} disabled={selected.length < 1 || saving}
           className={`w-full py-4 rounded-2xl text-sm font-bold transition-all ${
-            selected.length >= 3 ? "bg-[#FF3D7F] text-white hover:bg-[#d42d6e] shadow-md" : "bg-white text-gray-300 cursor-not-allowed"
+            selected.length >= 1 ? "bg-[#FF3D7F] text-white hover:bg-[#d42d6e] shadow-md" : "bg-white text-gray-300 cursor-not-allowed"
           }`}>
           {saving ? "저장 중..." : saved ? "저장됨 ✓" : "취향 저장"}
         </button>
