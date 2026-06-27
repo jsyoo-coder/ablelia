@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import ProductCard from "./components/ProductCard";
@@ -31,11 +31,20 @@ const TRENDING = [
   "크롭 자켓", "플랫폼 슈즈", "니트 조끼", "버킷햇", "스트링 백팩",
 ];
 
-const SUGGESTIONS = [
-  "린넨 셔츠", "오버핏 티셔츠", "와이드 팬츠", "버킷햇", "청자켓",
-  "니트 조끼", "크롭 탑", "스트링 백팩", "플랫폼 슈즈", "데님 쇼츠",
-  "트렌치코트", "슬링백", "카디건", "조거팬츠", "반집업",
-];
+const STYLE_ITEMS: Record<string, string[]> = {
+  minimal:  ["베이직 티셔츠", "린넨 셔츠", "슬랙스", "미니멀 자켓", "흰 셔츠"],
+  street:   ["그래픽 티셔츠", "오버핏 후드", "카고팬츠", "스트릿 자켓", "조거팬츠"],
+  casual:   ["청자켓", "와이드 팬츠", "데님 쇼츠", "캐주얼 원피스", "반팔 티셔츠"],
+  formal:   ["슬랙스", "블레이저", "포멀 셔츠", "트렌치코트", "정장 스커트"],
+  vintage:  ["빈티지 데님", "레트로 자켓", "빈티지 셔츠", "와이드 청바지", "빈티지 코트"],
+  sporty:   ["트레이닝 팬츠", "레깅스", "스포츠 자켓", "후디", "반집업"],
+  feminine: ["플로럴 원피스", "미니스커트", "블라우스", "플리츠 스커트", "크롭 자켓"],
+  outdoor:  ["고어텍스 자켓", "아웃도어 팬츠", "플리스 자켓", "등산화", "조끼"],
+  luxury:   ["명품 가방", "하이엔드 코트", "디자이너 원피스", "럭셔리 슈즈", "명품 벨트"],
+  y2k:      ["로우라이즈 청바지", "크롭 탑", "Y2K 자켓", "체인 액세서리", "미니스커트"],
+  amekaji:  ["워크웨어 자켓", "체크 셔츠", "데님 팬츠", "아메카지 코트", "부츠"],
+  preppy:   ["체크 스커트", "카디건", "니트 조끼", "로퍼", "컬리지 셔츠"],
+};
 
 type Product = {
   title: string; link: string; image: string;
@@ -175,10 +184,35 @@ export default function Home() {
   }, [tab, loading, prefsKey]);
 
 
+  // 취향 기반 추천 검색어 (없으면 트렌딩)
+  const personalizedSuggestions = useMemo(() => {
+    const prefs = profile?.preferences ?? [];
+    const genders = profile?.genders ?? [];
+    const ageGroups = profile?.ageGroups ?? [];
+    const hasPrefs = prefs.length > 0 || genders.length > 0 || ageGroups.length > 0;
+    if (!hasPrefs) return TRENDING;
+
+    const gPrefix = genders.length === 1 ? genders[0] : "";
+    const aPrefix = ageGroups.length === 1 ? ageGroups[0].replace(" 이상", "") : "";
+    const stylePool = prefs.length > 0 ? prefs : Object.keys(STYLE_ITEMS);
+    const result: string[] = [];
+
+    for (const style of stylePool) {
+      for (const item of (STYLE_ITEMS[style] ?? []).slice(0, 3)) {
+        const parts = [aPrefix, gPrefix, item].filter(Boolean);
+        result.push(parts.join(" "));
+        if (result.length >= 12) break;
+      }
+      if (result.length >= 12) break;
+    }
+    return result;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.preferences?.join(","), profile?.genders?.join(","), profile?.ageGroups?.join(",")]);
+
   // 검색 홈 열릴 때 검색어별 썸네일 로드 (캐시)
   useEffect(() => {
     if (tab !== "search" || searchSubmitted) return;
-    const targets = [...new Set([...SUGGESTIONS.slice(0, 10), ...recentSearches])];
+    const targets = [...new Set([...personalizedSuggestions, ...recentSearches])];
     const toLoad = targets.filter(s => !searchImgCacheRef.current[s]);
     if (!toLoad.length) return;
     (async () => {
@@ -196,7 +230,7 @@ export default function Home() {
       setSearchImgs({ ...searchImgCacheRef.current });
     })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab, searchSubmitted]);
+  }, [tab, searchSubmitted, personalizedSuggestions]);
 
   // 프로필 메뉴 외부 클릭 닫기
   useEffect(() => {
@@ -252,10 +286,9 @@ export default function Home() {
 
   const userPrefs = profile?.preferences ?? [];
 
-  // 드롭다운에 보여줄 추천 목록 (쿼리 필터링)
   const filteredSuggestions = query.trim()
-    ? SUGGESTIONS.filter(s => s.includes(query)).slice(0, 6)
-    : SUGGESTIONS.slice(0, 8);
+    ? personalizedSuggestions.filter(s => s.includes(query)).slice(0, 8)
+    : personalizedSuggestions.slice(0, 10);
 
   return (
     <div className="min-h-screen pb-6" style={{ background: "#F7F0E6" }}>
@@ -511,7 +544,7 @@ export default function Home() {
 
           <div>
             <h2 className="text-sm font-black text-[#1A1A1A] mb-3">
-              {query.trim() ? "검색 제안" : "추천 아이디어"}
+              {query.trim() ? "검색 제안" : "추천 아이템"}
             </h2>
             {filteredSuggestions.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
