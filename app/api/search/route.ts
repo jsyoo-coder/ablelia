@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   const display = Math.min(Number(request.nextUrl.searchParams.get("display") ?? "40"), 100);
 
   const res = await fetch(
-    `https://openapi.naver.com/v1/search/shop.json?query=${encodeURIComponent(query)}&display=${display}&start=${start}&sort=sim`,
+    `https://openapi.naver.com/v1/search/shop.json?query=${encodeURIComponent(query)}&display=${display}&start=${start}&sort=date`,
     {
       headers: {
         "X-Naver-Client-Id": process.env.NAVER_CLIENT_ID!,
