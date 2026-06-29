@@ -182,26 +182,49 @@ export default function ProfilePage() {
           ))}
         </div>
 
-        {/* 스타일 카테고리 */}
-        <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase mb-1">CATEGORIES</p>
-        <p className="text-xs text-gray-400 mb-3">홈 피드에 반영됩니다</p>
-        <div className="grid grid-cols-3 gap-2.5 mb-6">
+        {/* 전체 보기 토글 */}
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase">CATEGORIES</p>
+          <span className="text-[10px] text-gray-400 font-semibold">복수 선택 가능</span>
+        </div>
+        <button
+          onClick={() => setSelected([])}
+          className={`w-full py-3 rounded-2xl text-sm font-bold mb-3 transition-all border-2 ${
+            selected.length === 0
+              ? "bg-[#FF3D7F] text-white border-[#FF3D7F] shadow-sm"
+              : "bg-white text-[#555] border-transparent shadow-sm"
+          }`}
+        >
+          전체 보기
+        </button>
+
+        <div className="grid grid-cols-3 gap-2 mb-6">
           {STYLES.map(s => {
             const on = selected.includes(s.id);
             const img = styleImgs[s.id];
             return (
               <button key={s.id} onClick={() => toggle(s.id)}
-                className={`relative flex flex-col items-end justify-end overflow-hidden rounded-3xl transition-all aspect-square ${
-                  on ? "ring-[3px] ring-[#FF3D7F] shadow-lg z-10" : "shadow-sm hover:shadow-md"
+                className={`relative flex flex-col overflow-hidden rounded-2xl transition-all bg-white ${
+                  on ? "ring-2 ring-[#FF3D7F] shadow-lg" : "shadow-sm"
                 }`}>
-                {img ? <img src={img} alt={s.label} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-                  : <div className="absolute inset-0 bg-[#EDE6DA] animate-pulse" />}
-                <div className="absolute inset-0" style={{ background: on ? "linear-gradient(to top, rgba(255,61,127,0.85) 0%, rgba(255,61,127,0.3) 50%, rgba(0,0,0,0.1) 100%)" : "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)" }} />
-                {on && <div className="absolute top-2 right-2 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow">
-                  <svg width="11" height="11" fill="none" stroke="#FF3D7F" strokeWidth="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                </div>}
-                <div className="relative z-10 pb-2.5 px-2 w-full">
-                  <p className="text-white text-xs font-black drop-shadow">{s.label}</p>
+                {/* 이미지 영역 */}
+                <div className="relative w-full overflow-hidden" style={{ aspectRatio: "1 / 1" }}>
+                  {img
+                    ? <img src={img} alt={s.label} className="w-full h-full object-cover" loading="lazy" />
+                    : <div className="w-full h-full bg-[#EDE6DA] animate-pulse" />
+                  }
+                  {on && (
+                    <div className="absolute inset-0 bg-[#FF3D7F]/20" />
+                  )}
+                  {on && (
+                    <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-[#FF3D7F] rounded-full flex items-center justify-center shadow">
+                      <svg width="10" height="10" fill="none" stroke="white" strokeWidth="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+                    </div>
+                  )}
+                </div>
+                {/* 텍스트 영역 */}
+                <div className="px-2 py-1.5">
+                  <p className={`text-xs font-bold text-center ${on ? "text-[#FF3D7F]" : "text-[#1A1A1A]"}`}>{s.label}</p>
                 </div>
               </button>
             );
