@@ -583,7 +583,7 @@ export default function Home() {
                 <button onClick={() => { setRecentSearches([]); saveRecent([]); }}
                   className="text-xs text-gray-400 hover:text-gray-600">전체 삭제</button>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {recentSearches.map(r => (
                   <button key={r} onClick={() => submitSearch(r)}
                     className="flex items-center gap-3 bg-white rounded-2xl p-2.5 shadow-sm hover:shadow-md transition-shadow text-left">
@@ -609,7 +609,7 @@ export default function Home() {
               {query.trim() ? "검색 제안" : "추천 아이템"}
             </h2>
             {filteredSuggestions.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {filteredSuggestions.map(s => (
                   <button key={s} onClick={() => submitSearch(s)}
                     className="flex items-center gap-3 bg-white rounded-2xl p-2.5 shadow-sm hover:shadow-md transition-shadow text-left">
