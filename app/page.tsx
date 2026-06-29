@@ -523,13 +523,6 @@ export default function Home() {
       {tab === "feed" ? (
         /* ── 피드 ── */
         <div className="px-3 pt-4 max-w-screen-xl mx-auto">
-          {!fetching && (items.length > 0 || popularProducts.length > 0) && (
-            <div className="mb-3">
-              <h2 className="text-xs font-black tracking-widest text-[#FF3D7F] uppercase">
-                {activeStyle ? STYLE_LABELS[activeStyle] : "NEW ITEMS"}
-              </h2>
-            </div>
-          )}
           {fetching ? (
             <div className="flex gap-3">
               {Array.from({ length: masoncols }, (_, col) => col).map(col => (
