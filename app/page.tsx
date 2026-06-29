@@ -559,7 +559,7 @@ export default function Home() {
                   onClick={() => { setActiveStyle(p); fetchItems(buildQuery(STYLE_QUERIES[p]), 1, false); }}
                   className={`shrink-0 flex items-center gap-1.5 text-xs font-semibold pl-1 pr-3 py-1 rounded-full transition-all ${
                     on
-                      ? "bg-[#FF3D7F] text-white shadow-sm"
+                      ? "bg-[#1A1A1A] text-white shadow-sm"
                       : "bg-white text-[#1A1A1A] shadow-sm hover:shadow-md"
                   }`}>
                   <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 bg-[#EDE6DA]">
