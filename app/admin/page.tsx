@@ -222,13 +222,6 @@ export default function AdminPage() {
               )}
             </div>
 
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-700 leading-relaxed">
-              <p className="font-bold mb-1">Firestore 규칙 필요</p>
-              <code className="block whitespace-pre-wrap font-mono text-[10px]">{`match /config/onboarding {
-  allow read: if true;
-  allow write: if request.auth.token.email == "js.yoo@ablelia.com";
-}`}</code>
-            </div>
           </div>
         )}
 
@@ -280,16 +273,6 @@ export default function AdminPage() {
               ))
             )}
 
-            {!usersLoading && !usersError && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-700 leading-relaxed">
-                <p className="font-bold mb-1">Firestore 규칙 필요 (users 컬렉션 읽기)</p>
-                <code className="block whitespace-pre-wrap font-mono text-[10px]">{`match /users/{uid} {
-  allow read: if request.auth.uid == uid
-    || request.auth.token.email == "js.yoo@ablelia.com";
-  allow write: if request.auth.uid == uid;
-}`}</code>
-              </div>
-            )}
           </div>
         )}
       </div>
