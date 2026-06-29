@@ -376,7 +376,7 @@ export default function Home() {
       )}
       {/* Header */}
       <header className="sticky top-0 z-20 px-4 pt-4 pb-3"
-        style={{ background: "linear-gradient(180deg, #FFCFE2 0%, rgba(247,240,230,0.97) 100%)", backdropFilter: "blur(12px)" }}>
+        style={{ background: "rgba(247,240,230,0.97)", backdropFilter: "blur(12px)" }}>
         <div className="flex items-center justify-between max-w-screen-xl mx-auto mb-3">
           {tab === "search" ? (
             <div className="flex items-center gap-2 w-full">
