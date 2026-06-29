@@ -11,7 +11,7 @@ interface OnboardingProps {
 const SLIDES = [
   { title: "국내 모든 패션\n한눈에 비교", desc: "무신사·에이블리·지그재그\n가격을 앱 하나로 비교하세요", statusBg: "#b0b0b1", bottomBg: "#b6b6b8" },
   { title: "지금 인기 있는\n아이템 먼저", desc: "가장 많이 찜 받은 상품을\n실시간으로 발견하세요", statusBg: "#ebe7ea", bottomBg: "#eae6ea" },
-  { title: "로그인하고\n내 스타일 저장", desc: "취향에 맞는 상품 추천과\n찜 목록을 언제나 확인하세요", statusBg: "#c9c3ba", bottomBg: "#c3b7b0" },
+  { title: "로그인하고\n내 스타일 저장", desc: "취향에 맞는 상품 추천과\n찜 목록을 언제나 확인하세요", statusBg: "#c9c3ba", bottomBg: "#483e34" },
 ];
 
 const R = 80;
