@@ -8,7 +8,7 @@ interface OnboardingProps {
   signingIn?: boolean;
 }
 
-const SLIDES = [
+const DEFAULT_SLIDES = [
   { title: "국내 모든 패션\n한눈에 비교", desc: "무신사·에이블리·지그재그\n가격을 앱 하나로 비교하세요", statusBg: "#b0b0b1", bottomBg: "#b6b6b8" },
   { title: "지금 인기 있는\n아이템 먼저", desc: "가장 많이 찜 받은 상품을\n실시간으로 발견하세요", statusBg: "#ebe7ea", bottomBg: "#eae6ea" },
   { title: "로그인하고\n내 스타일 저장", desc: "취향에 맞는 상품 추천과\n찜 목록을 언제나 확인하세요", statusBg: "#c9c3ba", bottomBg: "#4b443d" },
@@ -19,6 +19,31 @@ const R = 80;
 export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingProps) {
   const [step, setStep] = useState(0);
   const touchStartX = useRef(0);
+  const [slides, setSlides] = useState(DEFAULT_SLIDES);
+
+  useEffect(() => {
+    async function loadConfig() {
+      try {
+        const { getFirestore, doc, getDoc } = await import("firebase/firestore");
+        const { app } = await import("@/lib/firebase");
+        const db = getFirestore(app);
+        const snap = await getDoc(doc(db, "config", "onboarding"));
+        if (snap.exists()) {
+          const data = snap.data();
+          if (Array.isArray(data.slides) && data.slides.length === DEFAULT_SLIDES.length) {
+            setSlides(DEFAULT_SLIDES.map((d, i) => ({
+              ...d,
+              title: data.slides[i]?.title ?? d.title,
+              desc: data.slides[i]?.desc ?? d.desc,
+            })));
+          }
+        }
+      } catch {
+        // Firestore 읽기 실패 시 기본값 유지
+      }
+    }
+    loadConfig();
+  }, []);
 
   // PC: status-bar DOM 배경 / 모바일 Safari: theme-color meta 태그로 상단 색상 제어
   useEffect(() => {
@@ -50,7 +75,7 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
     }
     // 모바일 Safari 상단: 이미지 색상값 유지
     const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", SLIDES[step].statusBg);
+    if (meta) meta.setAttribute("content", slides[step].statusBg);
   }, [step]);
 
   // 배경 스크롤 차단
@@ -65,8 +90,8 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
     return () => { targets.forEach((el, i) => { el.style.overflow = prevs[i]; }); };
   }, []);
 
-  const { title, desc } = SLIDES[step];
-  const isLast = step === SLIDES.length - 1;
+  const { title, desc } = slides[step];
+  const isLast = step === slides.length - 1;
 
   function handleTouchStart(e: React.TouchEvent) {
     touchStartX.current = e.touches[0].clientX;
@@ -80,7 +105,7 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col"
-      style={{ background: SLIDES[step].bottomBg }}
+      style={{ background: slides[step].bottomBg }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onTouchMove={e => e.stopPropagation()}
@@ -114,7 +139,7 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
         </svg>
 
         <div className="flex justify-center gap-2 mb-5">
-          {SLIDES.map((_, i) => (
+          {slides.map((_, i) => (
             <button
               key={i}
               onClick={() => setStep(i)}
