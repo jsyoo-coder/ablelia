@@ -18,6 +18,7 @@ type UserRow = {
   uid: string;
   displayName: string;
   email: string;
+  photoURL: string;
   preferences: string[];
   genders: string[];
   ageGroups: string[];
@@ -79,6 +80,7 @@ export default function AdminPage() {
             uid: d.id,
             displayName: data.displayName ?? "",
             email: data.email ?? "",
+            photoURL: data.photoURL ?? "",
             preferences: data.preferences ?? [],
             genders: data.genders ?? [],
             ageGroups: data.ageGroups ?? [],
@@ -245,11 +247,21 @@ export default function AdminPage() {
               users.map(u => (
                 <div key={u.uid} className="bg-white rounded-2xl p-4 shadow-sm">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="w-9 h-9 rounded-full bg-[#FF3D7F] flex items-center justify-center text-white text-sm font-black shrink-0">
-                      {u.displayName?.[0] ?? "?"}
-                    </div>
+                    {u.photoURL ? (
+                      <img src={u.photoURL} alt={u.displayName} referrerPolicy="no-referrer"
+                        className="w-9 h-9 rounded-full object-cover shrink-0" />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-[#FF3D7F] flex items-center justify-center text-white text-sm font-black shrink-0">
+                        {u.displayName?.[0] ?? "?"}
+                      </div>
+                    )}
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold text-[#1A1A1A] truncate">{u.displayName || "이름 없음"}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-sm font-bold text-[#1A1A1A] truncate">{u.displayName || "이름 없음"}</p>
+                        {ADMIN_EMAILS.includes(u.email) && (
+                          <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-[#1A1A1A] text-white shrink-0">최고관리자</span>
+                        )}
+                      </div>
                       <p className="text-xs text-gray-400 truncate">{u.email}</p>
                     </div>
                     <span className={`text-[10px] font-bold px-2 py-1 rounded-full shrink-0 ${
