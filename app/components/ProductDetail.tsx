@@ -51,11 +51,28 @@ export default function ProductDetail({
   const masoncols = 2;
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // 오버레이가 열린 동안 body 스크롤 잠금 (브라우저 스크롤바 방지)
+  // 오버레이가 열린 동안 스크롤 잠금
+  // phone-screen의 scrollTop이 남아있으면 fixed inset-0이 그만큼 밀려 버튼 위치가 틀어짐
+  // → scrollTop을 0으로 리셋하고 닫을 때 복구
   useEffect(() => {
-    const prev = document.body.style.overflow;
+    const prevBody = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
+
+    const screen = document.getElementById("phone-screen");
+    const savedScrollTop = screen?.scrollTop ?? 0;
+    const prevOverflow = screen?.style.overflowY ?? "";
+    if (screen) {
+      screen.scrollTop = 0;
+      screen.style.overflowY = "hidden";
+    }
+
+    return () => {
+      document.body.style.overflow = prevBody;
+      if (screen) {
+        screen.style.overflowY = prevOverflow;
+        screen.scrollTop = savedScrollTop;
+      }
+    };
   }, []);
 
   // 프로필 메뉴 외부 클릭 시 닫기
