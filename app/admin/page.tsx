@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { app } from "@/lib/firebase";
 
-const ADMIN_EMAILS = ["js.yoo@pivot-inc.com"];
+const ADMIN_EMAILS = ["js.yoo@ablelia.com"];
 
 const DEFAULT_SLIDES = [
   { title: "국내 모든 패션\n한눈에 비교", desc: "무신사·에이블리·지그재그\n가격을 앱 하나로 비교하세요" },
@@ -90,7 +90,7 @@ export default function AdminPage() {
       } catch (e: unknown) {
         const code = (e as { code?: string })?.code ?? String(e);
         if (code.includes("permission")) {
-          setUsersError("Firestore 규칙에서 관리자 읽기 권한을 허용해주세요.\nmatch /users/{uid} { allow read: if request.auth.token.email == \"js.yoo@pivot-inc.com\"; }");
+          setUsersError("Firestore 규칙에서 관리자 읽기 권한을 허용해주세요.\nmatch /users/{uid} { allow read: if request.auth.token.email == \"js.yoo@ablelia.com\"; }");
         } else {
           setUsersError(code);
         }
@@ -226,7 +226,7 @@ export default function AdminPage() {
               <p className="font-bold mb-1">Firestore 규칙 필요</p>
               <code className="block whitespace-pre-wrap font-mono text-[10px]">{`match /config/onboarding {
   allow read: if true;
-  allow write: if request.auth.token.email == "js.yoo@pivot-inc.com";
+  allow write: if request.auth.token.email == "js.yoo@ablelia.com";
 }`}</code>
             </div>
           </div>
@@ -285,7 +285,7 @@ export default function AdminPage() {
                 <p className="font-bold mb-1">Firestore 규칙 필요 (users 컬렉션 읽기)</p>
                 <code className="block whitespace-pre-wrap font-mono text-[10px]">{`match /users/{uid} {
   allow read: if request.auth.uid == uid
-    || request.auth.token.email == "js.yoo@pivot-inc.com";
+    || request.auth.token.email == "js.yoo@ablelia.com";
   allow write: if request.auth.uid == uid;
 }`}</code>
               </div>
