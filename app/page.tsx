@@ -337,7 +337,7 @@ export default function Home() {
           signingIn={signingIn}
         />
       )}
-      {selectedProduct && tab !== "search" && (
+      {selectedProduct && (
         <ProductDetail
           product={selectedProduct}
           likeCount={(selectedProduct as Product & { count?: number }).count}
