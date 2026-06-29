@@ -80,9 +80,7 @@ export default function Onboarding({ onLogin, onSkip, signingIn }: OnboardingPro
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col"
-      style={{
-        background: `linear-gradient(to bottom, ${SLIDES[step].statusBg}, ${SLIDES[step].bottomBg})`,
-      }}
+      style={{ background: SLIDES[step].bottomBg }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onTouchMove={e => e.stopPropagation()}
