@@ -147,26 +147,28 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-[#F7F0E6]">
       {/* 헤더 */}
-      <header className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-gray-100 px-5 py-3 flex items-center gap-3">
-        <button onClick={() => router.push("/")} className="w-8 h-8 bg-[#F7F0E6] rounded-full flex items-center justify-center">
-          <svg width="14" height="14" fill="none" stroke="#1A1A1A" strokeWidth="2.2" viewBox="0 0 24 24">
-            <path d="M19 12H5M12 5l-7 7 7 7"/>
-          </svg>
-        </button>
-        <span className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase">ADMIN</span>
-        <span className="ml-auto text-xs text-gray-400">{profile.email}</span>
-      </header>
-
-      {/* 탭 */}
-      <div className="sticky top-14 z-10 flex gap-0 bg-white border-b border-gray-100">
-        {(["onboarding", "users"] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`flex-1 py-3 text-xs font-bold transition-colors ${
-              tab === t ? "text-[#FF3D7F] border-b-2 border-[#FF3D7F]" : "text-gray-400"
-            }`}>
-            {t === "onboarding" ? "온보딩 문구" : "사용자 목록"}
+      <div className="sticky top-0 z-20 bg-white/95 backdrop-blur">
+        <header className="border-b border-gray-100 px-5 py-3 flex items-center gap-3">
+          <button onClick={() => router.push("/")} className="w-8 h-8 bg-[#F7F0E6] rounded-full flex items-center justify-center">
+            <svg width="14" height="14" fill="none" stroke="#1A1A1A" strokeWidth="2.2" viewBox="0 0 24 24">
+              <path d="M19 12H5M12 5l-7 7 7 7"/>
+            </svg>
           </button>
-        ))}
+          <span className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase">ADMIN</span>
+          <span className="ml-auto text-xs text-gray-400">{profile.email}</span>
+        </header>
+
+        {/* 탭 */}
+        <div className="flex border-b border-gray-100">
+          {(["onboarding", "users"] as const).map(t => (
+            <button key={t} onClick={() => setTab(t)}
+              className={`flex-1 py-3 text-xs font-bold transition-colors ${
+                tab === t ? "text-[#FF3D7F] border-b-2 border-[#FF3D7F]" : "text-gray-400"
+              }`}>
+              {t === "onboarding" ? "온보딩 문구" : "사용자 목록"}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6">
