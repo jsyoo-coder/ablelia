@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Product } from "./ProductCard";
 import ProductCard from "./ProductCard";
@@ -36,10 +35,7 @@ export default function ProductDetail({
 }: {
   product: Product; onClose: () => void; onSelect: (p: Product) => void; onSearchOpen?: () => void; likeCount?: number;
 }) {
-  const router = useRouter();
-  const { user, profile, logout } = useAuth();
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const profileMenuRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
   const title = product.title.replace(/<[^>]+>/g, "");
   const price = product.lprice ? Number(product.lprice).toLocaleString() : null;
   const label = product.brand || product.mallName || "";
@@ -51,46 +47,23 @@ export default function ProductDetail({
   const masoncols = 2;
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // 오버레이가 열린 동안 스크롤 잠금
-  // phone-screen의 scrollTop이 남아있으면 fixed inset-0이 그만큼 밀려 버튼 위치가 틀어짐
-  // → scrollTop을 0으로 리셋하고 닫을 때 복구
   useEffect(() => {
     const prevBody = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-
     const screen = document.getElementById("phone-screen");
     const savedScrollTop = screen?.scrollTop ?? 0;
     const prevOverflow = screen?.style.overflowY ?? "";
-    if (screen) {
-      screen.scrollTop = 0;
-      screen.style.overflowY = "hidden";
-    }
-
+    if (screen) { screen.scrollTop = 0; screen.style.overflowY = "hidden"; }
     return () => {
       document.body.style.overflow = prevBody;
-      if (screen) {
-        screen.style.overflowY = prevOverflow;
-        screen.scrollTop = savedScrollTop;
-      }
+      if (screen) { screen.style.overflowY = prevOverflow; screen.scrollTop = savedScrollTop; }
     };
-  }, []);
-
-  // 프로필 메뉴 외부 클릭 시 닫기
-  useEffect(() => {
-    function handler(e: MouseEvent) {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
-        setShowProfileMenu(false);
-      }
-    }
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   useLayoutEffect(() => {
     scrollRef.current?.scrollTo(0, 0);
   }, [product.link]);
 
-  // 전체 좋아요 카운트 실시간 구독
   useEffect(() => {
     setGlobalLikeCount(initialLikeCount ?? 0);
     let unsubscribe: (() => void) | undefined;
@@ -101,9 +74,7 @@ export default function ProductDetail({
         const db = getFirestore(app);
         unsubscribe = onSnapshot(
           doc(db, "product_likes", productDocId(product.link)),
-          (snap) => {
-            if (snap.exists()) setGlobalLikeCount(snap.data().count ?? 0);
-          },
+          (snap) => { if (snap.exists()) setGlobalLikeCount(snap.data().count ?? 0); },
           (e) => console.error("product_likes 구독 실패:", e)
         );
       } catch (e) { console.error("product_likes 구독 초기화 실패:", e); }
@@ -116,7 +87,6 @@ export default function ProductDetail({
     setLiked(getLikes().includes(product.link));
     setLoadingSimilar(true);
     setSimilar([]);
-
     const q = buildSimilarQuery(product);
     fetch(`/api/search?q=${encodeURIComponent(q)}&display=20`)
       .then(r => r.json())
@@ -135,22 +105,17 @@ export default function ProductDetail({
     setLiked(nowLiked);
     setGlobalLikeCount(prev => Math.max(0, prev + (nowLiked ? 1 : -1)));
 
-    // 로그인 상태일 때 Firestore 동기화
     if (user) {
       try {
         const { getFirestore, doc, setDoc, deleteDoc, increment, serverTimestamp } = await import("firebase/firestore");
         const { app } = await import("@/lib/firebase");
         const db = getFirestore(app);
         const docId = productDocId(product.link);
-
-        // 전체 좋아요 카운트
         await setDoc(doc(db, "product_likes", docId), {
           link: product.link, title: product.title, image: product.image,
           lprice: product.lprice, brand: product.brand, mallName: product.mallName,
           category2: product.category2, count: increment(nowLiked ? 1 : -1),
         }, { merge: true });
-
-        // 개인 찜 목록
         const userRef = doc(db, "users", user.uid, "liked_products", docId);
         if (nowLiked) {
           await setDoc(userRef, {
@@ -161,16 +126,12 @@ export default function ProductDetail({
         } else {
           await deleteDoc(userRef);
         }
-      } catch (e) {
-        console.error("좋아요 동기화 실패:", e);
-      }
+      } catch (e) { console.error("좋아요 동기화 실패:", e); }
     }
   }
 
-  const headerBg = { background: "rgba(247,240,230,0.97)", backdropFilter: "blur(12px)", zIndex: 20 } as React.CSSProperties;
-
   const SimilarGrid = () => (
-    <div className="px-3 pt-4">
+    <div className="px-3 pt-4 pb-6">
       <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase mb-3 px-1">유사 상품</p>
       {loadingSimilar ? (
         <div className="flex gap-3">
@@ -210,144 +171,74 @@ export default function ProductDetail({
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col"
-      style={{ background: "#F7F0E6", animation: "detailSlideUp 0.28s ease-out" }}
+      style={{ background: "#1A1A1A", animation: "detailSlideUp 0.28s ease-out" }}
     >
-      {/* ── Header ── */}
-      <div className="shrink-0 flex items-center justify-between px-4 pt-4 pb-3" style={headerBg}>
+      {/* 이미지 영역 */}
+      <div className="relative shrink-0" style={{ height: "55%" }}>
+        {product.image ? (
+          <img src={product.image} alt={title} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full bg-[#EDE6DA]" />
+        )}
+
         {/* 뒤로가기 */}
         <button onClick={onClose}
-          className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-sm">
+          className="absolute top-4 left-4 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md">
           <svg width="16" height="16" fill="none" stroke="#1A1A1A" strokeWidth="2.2" viewBox="0 0 24 24">
             <path d="M19 12H5M12 5l-7 7 7 7"/>
           </svg>
         </button>
 
-        {/* 우측: 검색 + 프로필 */}
-        <div className="flex items-center gap-3">
-          <button onClick={onSearchOpen}
-            className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
-            <svg width="16" height="16" fill="none" stroke="#1A1A1A" strokeWidth="2" viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/>
-            </svg>
-          </button>
+        {/* 찜 버튼 */}
+        <button onClick={toggleLike}
+          className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center shadow-md backdrop-blur-sm transition-colors ${
+            liked ? "bg-[#FF3D7F]" : "bg-white/80"
+          }`}>
+          <svg width="18" height="18" viewBox="0 0 24 24"
+            fill={liked ? "white" : "none"}
+            stroke={liked ? "white" : "#FF3D7F"} strokeWidth="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
+      </div>
 
-          {user ? (
-            <div ref={profileMenuRef} className="relative">
-              <button
-                onClick={() => setShowProfileMenu(v => !v)}
-                className="flex items-center gap-1.5 bg-white rounded-full pl-1 pr-2.5 py-1 shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-7 h-7 rounded-full overflow-hidden shrink-0">
-                  {profile?.photoURL
-                    ? <img src={profile.photoURL} className="w-full h-full object-cover" alt="" referrerPolicy="no-referrer" />
-                    : <div className="w-full h-full bg-[#FF3D7F] flex items-center justify-center text-white text-xs font-bold">
-                        {profile?.displayName?.[0]}
-                      </div>
-                  }
-                </div>
-                <svg width="12" height="12" fill="none" stroke="#999" strokeWidth="2.5" viewBox="0 0 24 24"
-                  className={`transition-transform ${showProfileMenu ? "rotate-180" : ""}`}>
-                  <path d="M6 9l6 6 6-6"/>
-                </svg>
-              </button>
-
-              {showProfileMenu && (
-                <div className="absolute right-0 top-12 w-64 bg-white rounded-3xl shadow-2xl overflow-hidden z-50"
-                  style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.15)" }}>
-                  <div className="px-4 pt-4 pb-2">
-                    <p className="text-[10px] text-gray-400 font-semibold mb-2">현재 로그인 계정</p>
-                    <div className="flex items-center gap-3 bg-[#F7F0E6] rounded-2xl p-3">
-                      <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 ring-2 ring-[#FF3D7F]">
-                        {profile?.photoURL
-                          ? <img src={profile.photoURL} className="w-full h-full object-cover" alt="" referrerPolicy="no-referrer" />
-                          : <div className="w-full h-full bg-[#FF3D7F] flex items-center justify-center text-white font-bold">
-                              {profile?.displayName?.[0]}
-                            </div>
-                        }
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-sm text-[#1A1A1A] truncate">{profile?.displayName}</p>
-                        <p className="text-[11px] text-gray-400 truncate">{profile?.email}</p>
-                      </div>
-                      <svg width="14" height="14" fill="none" stroke="#FF3D7F" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path d="M20 6L9 17l-5-5"/>
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="mx-4 my-1 border-t border-gray-100" />
-                  <div className="px-2 pb-3">
-                    <button
-                      onClick={() => {
-                        sessionStorage.setItem("ablelia_detail_product", JSON.stringify(product));
-                        setShowProfileMenu(false);
-                        router.push("/profile");
-                      }}
-                      className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl hover:bg-[#F7F0E6] transition-colors text-left">
-                      <div className="w-8 h-8 bg-[#F7F0E6] rounded-full flex items-center justify-center shrink-0">
-                        <svg width="14" height="14" fill="none" stroke="#FF3D7F" strokeWidth="2" viewBox="0 0 24 24">
-                          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-                        </svg>
-                      </div>
-                      <span className="text-sm font-semibold text-[#1A1A1A]">스타일 취향 설정</span>
-                    </button>
-                    <button
-                      onClick={async () => { setShowProfileMenu(false); await logout(); onClose(); }}
-                      className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl hover:bg-red-50 transition-colors text-left">
-                      <div className="w-8 h-8 bg-red-50 rounded-full flex items-center justify-center shrink-0">
-                        <svg width="14" height="14" fill="none" stroke="#ef4444" strokeWidth="2" viewBox="0 0 24 24">
-                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
-                        </svg>
-                      </div>
-                      <span className="text-sm font-semibold text-red-500">로그아웃</span>
-                    </button>
-                  </div>
-                </div>
+      {/* 바텀 카드 */}
+      <div
+        className="flex-1 bg-white flex flex-col overflow-hidden"
+        style={{ borderRadius: "2rem 2rem 0 0", marginTop: "-1.5rem", boxShadow: "0 -8px 32px rgba(0,0,0,0.12)" }}
+      >
+        {/* 스크롤 영역 */}
+        <div ref={scrollRef} className="flex-1 overflow-y-auto">
+          <div className="px-6 pt-6 pb-4">
+            {/* 상품명 + 가격 */}
+            <div className="flex items-start justify-between gap-3 mb-1.5">
+              <p className="text-xl font-black text-[#1A1A1A] leading-snug flex-1">{title}</p>
+              {price && (
+                <p className="text-lg font-black text-[#1A1A1A] shrink-0 pt-0.5">{price}원</p>
               )}
             </div>
-          ) : null}
-        </div>
-      </div>
-
-      {/* ── 단일 스크롤 ── */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto pb-24">
-        {/* 이미지 */}
-        <div className="bg-white mx-3 mt-1 rounded-3xl overflow-hidden shadow-sm">
-          {product.image && (
-            <img src={product.image} alt={title} className="w-full h-auto block" />
-          )}
-        </div>
-        {/* 상품 정보 */}
-        <div className="px-5 pt-5 pb-3">
-          {label && (
-            <p className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold mb-1">{label}</p>
-          )}
-          <p className="text-lg font-bold text-[#1A1A1A] leading-snug mb-2">{title}</p>
-          {price && (
-            <p className="text-3xl font-black text-[#FF3D7F]">{price}원</p>
-          )}
-        </div>
-        {/* 유사 상품 */}
-        <SimilarGrid />
-      </div>
-
-      {/* 하단 고정 — 좋아요 + 구매 버튼 */}
-      <div className="shrink-0 px-4 py-4 border-t border-black/5" style={headerBg}>
-        <div className="flex gap-3">
-          <button onClick={toggleLike}
-            className={`shrink-0 w-14 rounded-2xl flex flex-col items-center justify-center gap-0.5 py-2 shadow-md transition-colors ${
-              liked ? "bg-[#FF3D7F]" : "bg-white"
-            }`}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill={liked ? "white" : "none"}
-              stroke={liked ? "none" : "#FF3D7F"} strokeWidth="2">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-            </svg>
-            {globalLikeCount > 0 && (
-              <span className={`text-[10px] font-bold leading-none ${liked ? "text-white" : "text-[#FF3D7F]"}`}>
-                {globalLikeCount}
-              </span>
+            {label && (
+              <p className="text-sm text-gray-400 mb-3">{label}</p>
             )}
-          </button>
+            {globalLikeCount > 0 && (
+              <div className="inline-flex items-center gap-1.5 bg-[#FFF0F5] px-3 py-1.5 rounded-full">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="#FF3D7F">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                <span className="text-xs font-bold text-[#FF3D7F]">{globalLikeCount}명이 찜했어요</span>
+              </div>
+            )}
+          </div>
+
+          <div className="border-t border-gray-100">
+            <SimilarGrid />
+          </div>
+        </div>
+
+        {/* 하단 구매 버튼 */}
+        <div className="shrink-0 px-4 py-4 border-t border-black/5 bg-white">
           <a href={product.link} target="_blank" rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-2 py-4 bg-[#FF3D7F] text-white rounded-2xl font-bold text-sm shadow-md hover:bg-[#d42d6e] transition-colors">
+            className="flex items-center justify-center gap-2 w-full py-4 bg-[#FF3D7F] text-white rounded-2xl font-bold text-base shadow-md hover:bg-[#d42d6e] transition-colors">
             구매하러 가기
             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path d="M7 17L17 7M7 7h10v10"/>
