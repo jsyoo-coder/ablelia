@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -44,6 +45,11 @@ export default function ProfilePage() {
   const [showPopup, setShowPopup] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [styleImgs, setStyleImgs] = useState<Record<string, string>>({});
+  const [portalEl, setPortalEl] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    setPortalEl(document.getElementById("phone-screen") ?? document.body);
+  }, []);
 
   useEffect(() => {
     if (loading) return;
@@ -102,11 +108,11 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen pb-10" style={{ background: "#F7F0E6" }}>
 
-      {/* 저장 완료 팝업 */}
-      {showPopup && (
+      {/* 저장 완료 팝업 — phone-screen에 직접 포탈하여 스크롤 위치와 무관하게 중앙 표시 */}
+      {showPopup && portalEl && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/30" />
-          <div className="relative bg-white rounded-3xl px-8 py-8 flex flex-col items-center gap-3 shadow-2xl mx-6">
+          <div className="relative z-10 bg-white rounded-3xl px-8 py-8 flex flex-col items-center gap-3 shadow-2xl mx-6">
             <div className="w-14 h-14 bg-[#FF3D7F] rounded-full flex items-center justify-center">
               <svg width="28" height="28" fill="none" stroke="white" strokeWidth="3" viewBox="0 0 24 24">
                 <path d="M20 6L9 17l-5-5"/>
@@ -115,7 +121,8 @@ export default function ProfilePage() {
             <p className="text-lg font-black text-[#1A1A1A]">취향 저장 완료!</p>
             <p className="text-sm text-gray-400 text-center">선택한 취향으로 피드가 업데이트됩니다</p>
           </div>
-        </div>
+        </div>,
+        portalEl
       )}
 
       <header className="px-5 pt-5 pb-4 flex items-center justify-between">
