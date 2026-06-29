@@ -345,7 +345,7 @@ export default function Home() {
   }
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "linear-gradient(180deg, #FFD6E6 0%, #F7F0E6 36%)" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "#F7F0E6" }}>
       <div className="w-6 h-6 border-2 border-[#FF3D7F] border-t-transparent rounded-full animate-spin" />
     </div>
   );
@@ -357,7 +357,7 @@ export default function Home() {
     : personalizedSuggestions.slice(0, 10);
 
   return (
-    <div className="min-h-screen pb-6" style={{ background: "linear-gradient(180deg, #FFD6E6 0%, #F7F0E6 36%)" }}>
+    <div className="min-h-screen pb-6" style={{ background: "#F7F0E6" }}>
       {showOnboarding && (
         <Onboarding
           onLogin={handleLogin}
@@ -376,7 +376,7 @@ export default function Home() {
       )}
       {/* Header */}
       <header className="sticky top-0 z-20 px-4 pt-4 pb-3"
-        style={{ background: "linear-gradient(180deg, rgba(255,214,230,0.97) 0%, rgba(247,240,230,0.97) 100%)", backdropFilter: "blur(12px)" }}>
+        style={{ background: "linear-gradient(180deg, #FFCFE2 0%, rgba(247,240,230,0.97) 100%)", backdropFilter: "blur(12px)" }}>
         <div className="flex items-center justify-between max-w-screen-xl mx-auto mb-3">
           {tab === "search" ? (
             <div className="flex items-center gap-2 w-full">
