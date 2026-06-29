@@ -186,15 +186,6 @@ export default function ProfilePage() {
         <p className="text-[10px] font-black tracking-widest text-[#FF3D7F] uppercase mb-1">CATEGORIES</p>
         <p className="text-xs text-gray-400 mb-3">홈 피드에 반영됩니다</p>
 
-        <button onClick={() => setSelected([])}
-          className={`w-full py-3 rounded-2xl text-sm font-bold mb-3 transition-all border-2 ${
-            selected.length === 0
-              ? "bg-[#FF3D7F] text-white border-[#FF3D7F] shadow-sm"
-              : "bg-white text-[#555] border-transparent shadow-sm"
-          }`}>
-          전체 보기
-        </button>
-
         <div className="grid grid-cols-3 gap-2.5 mb-6">
           {STYLES.map(s => {
             const on = selected.includes(s.id);
