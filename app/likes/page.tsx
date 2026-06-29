@@ -25,18 +25,6 @@ export default function LikesPage() {
   const [fetchError, setFetchError] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const masoncols = 2;
-  const isEmpty = !fetching && !fetchError && likedProducts.length === 0;
-
-  // 빈 상태일 때 phone-screen 스크롤 차단
-  useEffect(() => {
-    const screen = document.getElementById('phone-screen');
-    if (!screen) return;
-    if (isEmpty) {
-      screen.scrollTop = 0;
-      screen.style.overflowY = 'hidden';
-      return () => { screen.style.overflowY = ''; };
-    }
-  }, [isEmpty]);
 
   useEffect(() => {
     if (loading) return;
@@ -91,7 +79,7 @@ export default function LikesPage() {
   }, [likedProducts]);
 
   if (loading) return (
-    <div className="flex items-center justify-center py-32" style={{ background: "#F7F0E6" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "#F7F0E6" }}>
       <div className="w-6 h-6 border-2 border-[#FF3D7F] border-t-transparent rounded-full animate-spin" />
     </div>
   );
@@ -99,7 +87,7 @@ export default function LikesPage() {
   const headerBg = { background: "rgba(247,240,230,0.97)", backdropFilter: "blur(12px)" };
 
   return (
-    <div className="min-h-full pb-10" style={{ background: "#F7F0E6" }}>
+    <div className="min-h-screen pb-10" style={{ background: "#F7F0E6" }}>
       {selectedProduct && (
         <ProductDetail
           product={selectedProduct}
@@ -128,9 +116,9 @@ export default function LikesPage() {
           <div className="flex gap-3">
             {Array.from({ length: masoncols }, (_, col) => col).map(col => (
               <div key={col} className="flex-1 flex flex-col min-w-0">
-                {Array.from({ length: 2 }).map((_, i) => (
+                {Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="mb-3 rounded-3xl bg-white animate-pulse shadow-sm overflow-hidden">
-                    <div className="rounded-3xl m-2" style={{ height: `${160 + i * 50}px`, background: "#EDE6DA" }} />
+                    <div className="rounded-3xl m-2" style={{ height: `${160 + (i % 3) * 50}px`, background: "#EDE6DA" }} />
                     <div className="px-3 py-2.5 space-y-1.5">
                       <div className="h-2 bg-gray-100 rounded-full w-16" />
                       <div className="h-3 bg-gray-100 rounded-full w-full" />
@@ -159,7 +147,7 @@ export default function LikesPage() {
             </button>
           </div>
         ) : (
-          <div className="flex gap-3 pb-10">
+          <div className="flex gap-3">
             {Array.from({ length: masoncols }, (_, col) => col).map(col => (
               <div key={col} className="flex-1 flex flex-col min-w-0">
                 {likedProducts

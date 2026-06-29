@@ -86,7 +86,6 @@ export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
   const searchImgCacheRef = useRef<Record<string, string>>({});
   const [searchImgs, setSearchImgs] = useState<Record<string, string>>({});
-  const [styleChipImgs, setStyleChipImgs] = useState<Record<string, string>>({});
 
   // 비로그인이면 항상 온보딩 표시 (새로고침 포함)
   useEffect(() => {
@@ -325,25 +324,6 @@ export default function Home() {
 
   const userPrefs = profile?.preferences ?? [];
 
-  // 스타일 칩 이미지 로드
-  useEffect(() => {
-    if (userPrefs.length === 0) return;
-    const toLoad = userPrefs.filter(p => !styleChipImgs[p]);
-    if (toLoad.length === 0) return;
-    Promise.allSettled(
-      toLoad.map(async (p) => {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(STYLE_QUERIES[p] ?? p)}&display=3`);
-        const data = await res.json();
-        const img = (data.items ?? []).find((i: { image?: string }) => i.image)?.image ?? "";
-        return { p, img };
-      })
-    ).then(results => {
-      const map: Record<string, string> = {};
-      results.forEach(r => { if (r.status === "fulfilled" && r.value.img) map[r.value.p] = r.value.img; });
-      if (Object.keys(map).length > 0) setStyleChipImgs(prev => ({ ...prev, ...map }));
-    });
-  }, [userPrefs.join(",")]);
-
   const filteredSuggestions = query.trim()
     ? personalizedSuggestions.filter(s => s.includes(query)).slice(0, 8)
     : personalizedSuggestions.slice(0, 10);
@@ -514,26 +494,7 @@ export default function Home() {
 
         {/* 스타일·성별·나이 칩 */}
         {tab === "feed" && (userPrefs.length > 0 || (profile?.genders ?? []).length > 0 || (profile?.ageGroups ?? []).length > 0) && (
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide max-w-screen-xl mx-auto pb-0.5">
-            {/* 전체 보기 칩 - activeStyle이 있을 때만 */}
-            {activeStyle && (
-              <button
-                onClick={() => {
-                  setActiveStyle(null);
-                  const base = userPrefs.length > 0
-                    ? STYLE_QUERIES[userPrefs[Math.floor(Math.random() * userPrefs.length)]]
-                    : TRENDING[Math.floor(Math.random() * TRENDING.length)];
-                  fetchItems(buildQuery(base), 1, false);
-                }}
-                className="shrink-0 flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-[#1A1A1A] text-white shadow-sm"
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-                  <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-                </svg>
-                전체
-              </button>
-            )}
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide max-w-screen-xl mx-auto">
             {(profile?.genders ?? []).map(g => (
               <span key={`g-${g}`} className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-full bg-[#FF3D7F] text-white">
                 {g}
@@ -544,23 +505,17 @@ export default function Home() {
                 {a}
               </span>
             ))}
-            {userPrefs.map(p => {
-              const on = activeStyle === p;
-              const img = styleChipImgs[p];
-              return (
-                <button key={p}
-                  onClick={() => { setActiveStyle(p); fetchItems(buildQuery(STYLE_QUERIES[p]), 1, false); }}
-                  className={`shrink-0 flex items-center gap-1.5 text-xs font-semibold pl-1 pr-3 py-1 rounded-full transition-all ${
-                    on ? "bg-[#FF3D7F] text-white shadow-sm" : "bg-white text-[#1A1A1A] shadow-sm hover:shadow-md"
-                  }`}>
-                  {/* 이미지 섬네일 */}
-                  <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 bg-[#EDE6DA]">
-                    {img && <img src={img} alt="" className="w-full h-full object-cover" />}
-                  </div>
-                  {STYLE_LABELS[p] ?? p}
-                </button>
-              );
-            })}
+            {userPrefs.map(p => (
+              <button key={p}
+                onClick={() => { setActiveStyle(p); fetchItems(buildQuery(STYLE_QUERIES[p]), 1, false); }}
+                className={`shrink-0 text-xs font-semibold px-4 py-1.5 rounded-full transition-all ${
+                  activeStyle === p
+                    ? "bg-[#FF3D7F] text-white shadow-sm"
+                    : "bg-white text-[#1A1A1A] shadow-sm hover:shadow-md"
+                }`}>
+                {STYLE_LABELS[p] ?? p}
+              </button>
+            ))}
           </div>
         )}
       </header>
