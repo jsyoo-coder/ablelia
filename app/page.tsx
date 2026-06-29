@@ -86,6 +86,9 @@ export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
   const searchImgCacheRef = useRef<Record<string, string>>({});
   const [searchImgs, setSearchImgs] = useState<Record<string, string>>({});
+  const styleChipImgCacheRef = useRef<Record<string, string>>({});
+  const [styleChipImgs, setStyleChipImgs] = useState<Record<string, string>>({});
+  const initialFeedQueryRef = useRef<string>("");
 
   // 비로그인이면 항상 온보딩 표시 (새로고침 포함)
   useEffect(() => {
@@ -187,6 +190,7 @@ export default function Home() {
     setActiveStyle(null);
 
     const q = buildQuery(base);
+    initialFeedQueryRef.current = q;
     async function loadWithFallback() {
       setFetching(true);
       setItems([]);
@@ -258,6 +262,30 @@ export default function Home() {
     })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, searchSubmitted, personalizedSuggestions]);
+
+  // 스타일 칩 이미지 로드
+  useEffect(() => {
+    const prefs: string[] = profile?.preferences ?? [];
+    if (prefs.length === 0) return;
+    const toLoad = prefs.filter(p => !styleChipImgCacheRef.current[p]);
+    if (!toLoad.length) return;
+    Promise.allSettled(
+      toLoad.map(async p => {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(STYLE_QUERIES[p] ?? p)}&display=3`);
+        const data = await res.json();
+        const img = (data.items ?? []).find((i: { image?: string }) => i.image)?.image ?? "";
+        return { p, img };
+      })
+    ).then(results => {
+      const map: Record<string, string> = {};
+      results.forEach(r => { if (r.status === "fulfilled" && r.value.img) map[r.value.p] = r.value.img; });
+      if (Object.keys(map).length > 0) {
+        Object.assign(styleChipImgCacheRef.current, map);
+        setStyleChipImgs({ ...styleChipImgCacheRef.current });
+      }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefsKey]);
 
   // 프로필 메뉴 외부 클릭 닫기
   useEffect(() => {
@@ -505,17 +533,34 @@ export default function Home() {
                 {a}
               </span>
             ))}
-            {userPrefs.map(p => (
-              <button key={p}
-                onClick={() => { setActiveStyle(p); fetchItems(buildQuery(STYLE_QUERIES[p]), 1, false); }}
-                className={`shrink-0 text-xs font-semibold px-4 py-1.5 rounded-full transition-all ${
-                  activeStyle === p
-                    ? "bg-[#FF3D7F] text-white shadow-sm"
-                    : "bg-white text-[#1A1A1A] shadow-sm hover:shadow-md"
-                }`}>
-                {STYLE_LABELS[p] ?? p}
+            {activeStyle && (
+              <button onClick={() => { setActiveStyle(null); fetchItems(initialFeedQueryRef.current, 1, false); }}
+                className="shrink-0 flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-[#1A1A1A] text-white shadow-sm">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                  <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                </svg>
+                전체
               </button>
-            ))}
+            )}
+            {userPrefs.map(p => {
+              const on = activeStyle === p;
+              const img = styleChipImgs[p];
+              return (
+                <button key={p}
+                  onClick={() => { setActiveStyle(p); fetchItems(buildQuery(STYLE_QUERIES[p]), 1, false); }}
+                  className={`shrink-0 flex items-center gap-1.5 text-xs font-semibold pl-1 pr-3 py-1 rounded-full transition-all ${
+                    on
+                      ? "bg-[#FF3D7F] text-white shadow-sm"
+                      : "bg-white text-[#1A1A1A] shadow-sm hover:shadow-md"
+                  }`}>
+                  <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 bg-[#EDE6DA]">
+                    {img && <img src={img} alt="" className="w-full h-full object-cover" />}
+                  </div>
+                  {STYLE_LABELS[p] ?? p}
+                </button>
+              );
+            })}
           </div>
         )}
       </header>

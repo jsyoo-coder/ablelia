@@ -25,6 +25,7 @@ export default function LikesPage() {
   const [fetchError, setFetchError] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const masoncols = 2;
+  const isEmpty = !fetching && !fetchError && likedProducts.length === 0;
 
   useEffect(() => {
     if (loading) return;
@@ -78,8 +79,18 @@ export default function LikesPage() {
     fetchCounts();
   }, [likedProducts]);
 
+  useEffect(() => {
+    const screen = document.getElementById("phone-screen");
+    if (!screen) return;
+    if (isEmpty) {
+      screen.scrollTop = 0;
+      screen.style.overflowY = "hidden";
+      return () => { screen.style.overflowY = ""; };
+    }
+  }, [isEmpty]);
+
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "#F7F0E6" }}>
+    <div className="flex items-center justify-center py-32" style={{ background: "#F7F0E6" }}>
       <div className="w-6 h-6 border-2 border-[#FF3D7F] border-t-transparent rounded-full animate-spin" />
     </div>
   );
@@ -116,7 +127,7 @@ export default function LikesPage() {
           <div className="flex gap-3">
             {Array.from({ length: masoncols }, (_, col) => col).map(col => (
               <div key={col} className="flex-1 flex flex-col min-w-0">
-                {Array.from({ length: 4 }).map((_, i) => (
+                {Array.from({ length: 2 }).map((_, i) => (
                   <div key={i} className="mb-3 rounded-3xl bg-white animate-pulse shadow-sm overflow-hidden">
                     <div className="rounded-3xl m-2" style={{ height: `${160 + (i % 3) * 50}px`, background: "#EDE6DA" }} />
                     <div className="px-3 py-2.5 space-y-1.5">
