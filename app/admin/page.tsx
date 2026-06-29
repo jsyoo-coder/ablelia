@@ -158,7 +158,7 @@ export default function AdminPage() {
       </header>
 
       {/* 탭 */}
-      <div className="flex gap-0 bg-white border-b border-gray-100">
+      <div className="sticky top-14 z-10 flex gap-0 bg-white border-b border-gray-100">
         {(["onboarding", "users"] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`flex-1 py-3 text-xs font-bold transition-colors ${
