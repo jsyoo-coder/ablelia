@@ -522,7 +522,7 @@ export default function Home() {
 
         {/* 스타일·성별·나이 칩 */}
         {tab === "feed" && (userPrefs.length > 0 || (profile?.genders ?? []).length > 0 || (profile?.ageGroups ?? []).length > 0) && (
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide max-w-screen-xl mx-auto">
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide max-w-screen-xl mx-auto">
             {(profile?.genders ?? []).map(g => (
               <span key={`g-${g}`} className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-full bg-[#FF3D7F] text-white">
                 {g}
@@ -533,13 +533,21 @@ export default function Home() {
                 {a}
               </span>
             ))}
-            {activeStyle && (
+            {userPrefs.length > 0 && (
               <button onClick={() => { setActiveStyle(null); fetchItems(initialFeedQueryRef.current, 1, false); }}
-                className="shrink-0 flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-[#1A1A1A] text-white shadow-sm">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-                  <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-                </svg>
+                className={`shrink-0 flex items-center gap-1.5 text-xs font-bold pl-1 pr-3 py-1 rounded-full transition-all ${
+                  activeStyle === null
+                    ? "bg-[#1A1A1A] text-white shadow-sm"
+                    : "bg-white text-[#1A1A1A] shadow-sm hover:shadow-md"
+                }`}>
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+                  activeStyle === null ? "bg-white/20" : "bg-[#EDE6DA]"
+                }`}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                  </svg>
+                </div>
                 전체
               </button>
             )}
