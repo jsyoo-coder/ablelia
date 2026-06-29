@@ -77,7 +77,8 @@ export default function Home() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [searchSubmitted, setSearchSubmitted] = useState(false);
   const masoncols = 2;
-  const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(null);
+  const [productHistory, setProductHistory] = useState<ProductType[]>([]);
+  const selectedProduct = productHistory[productHistory.length - 1] ?? null;
   const [popularProducts, setPopularProducts] = useState<(Product & { count: number })[]>([]);
   const currentQueryRef = useRef("");
   const startRef = useRef(1);
@@ -101,7 +102,7 @@ export default function Home() {
   useEffect(() => {
     const saved = sessionStorage.getItem("ablelia_detail_product");
     if (saved) {
-      try { setSelectedProduct(JSON.parse(saved)); } catch {}
+      try { setProductHistory([JSON.parse(saved)]); } catch {}
       sessionStorage.removeItem("ablelia_detail_product");
     }
   }, []);
@@ -304,7 +305,7 @@ export default function Home() {
   // 비로그인 상태에서 상품 클릭 시 온보딩으로 복귀
   function handleSelectProduct(product: ProductType) {
     if (!user) { setShowOnboarding(true); return; }
-    setSelectedProduct(product);
+    setProductHistory(h => [...h, product]);
   }
 
   function openSearch() {
@@ -340,7 +341,7 @@ export default function Home() {
         <ProductDetail
           product={selectedProduct}
           likeCount={(selectedProduct as Product & { count?: number }).count}
-          onClose={() => setSelectedProduct(null)}
+          onClose={() => setProductHistory(h => h.slice(0, -1))}
           onSelect={handleSelectProduct}
           onSearchOpen={() => setTab("search")}
         />
