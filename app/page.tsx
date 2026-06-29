@@ -522,20 +522,20 @@ export default function Home() {
 
         {/* 스타일·성별·나이 칩 */}
         {tab === "feed" && (userPrefs.length > 0 || (profile?.genders ?? []).length > 0 || (profile?.ageGroups ?? []).length > 0) && (
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide max-w-screen-xl mx-auto">
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide max-w-screen-xl mx-auto py-1">
             {(profile?.genders ?? []).map(g => (
-              <span key={`g-${g}`} className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-full bg-[#FF3D7F] text-white">
+              <span key={`g-${g}`} className="shrink-0 inline-flex items-center h-8 px-3 rounded-full text-xs font-bold bg-[#FF3D7F] text-white">
                 {g}
               </span>
             ))}
             {(profile?.ageGroups ?? []).map(a => (
-              <span key={`a-${a}`} className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-full bg-[#FF3D7F] text-white">
+              <span key={`a-${a}`} className="shrink-0 inline-flex items-center h-8 px-3 rounded-full text-xs font-bold bg-[#FF3D7F] text-white">
                 {a}
               </span>
             ))}
             {userPrefs.length > 0 && (
               <button onClick={() => { setActiveStyle(null); fetchItems(initialFeedQueryRef.current, 1, false); }}
-                className={`shrink-0 flex items-center gap-1.5 text-xs font-bold pl-1 pr-3 py-1 rounded-full transition-all ${
+                className={`shrink-0 flex items-center h-8 gap-1.5 text-xs font-bold pl-1 pr-3 rounded-full transition-all ${
                   activeStyle === null
                     ? "bg-[#1A1A1A] text-white shadow-sm"
                     : "bg-white text-[#1A1A1A] shadow-sm hover:shadow-md"
@@ -557,7 +557,7 @@ export default function Home() {
               return (
                 <button key={p}
                   onClick={() => { setActiveStyle(p); fetchItems(buildQuery(STYLE_QUERIES[p]), 1, false); }}
-                  className={`shrink-0 flex items-center gap-1.5 text-xs font-semibold pl-1 pr-3 py-1 rounded-full transition-all ${
+                  className={`shrink-0 flex items-center h-8 gap-1.5 text-xs font-semibold pl-1 pr-3 rounded-full transition-all ${
                     on
                       ? "bg-[#1A1A1A] text-white shadow-sm"
                       : "bg-white text-[#1A1A1A] shadow-sm hover:shadow-md"
